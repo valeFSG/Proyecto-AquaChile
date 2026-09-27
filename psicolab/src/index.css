@@ -1,0 +1,377 @@
+:root {
+  --fondo: #eef1f3;
+  --superficie: #ffffff;
+  --tinta: #16232e;
+  --tinta-suave: #5a6b78;
+  --borde: #dce2e6;
+  --acento: #0f6e64;
+  --ambar: #b87503;
+  --azul: #2b5f9e;
+
+  font-family: 'Instrument Sans', system-ui, sans-serif;
+  color: var(--tinta);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--fondo);
+  -webkit-font-smoothing: antialiased;
+}
+
+.contenedor {
+  max-width: 60rem;
+  margin: 0 auto;
+  padding: 3rem 1.5rem 5rem;
+}
+
+.cabecera {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--borde);
+  margin-bottom: 1.5rem;
+}
+
+.cabecera {
+  align-items: center;
+}
+
+.cabecera h1 {
+  margin-bottom: 0.2rem;
+}
+
+.lista {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.tarjeta {
+  position: relative;
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: 6px;
+  padding: 1.1rem 1.25rem 1.1rem 1.75rem;
+  overflow: hidden;
+}
+
+/* La barra de estado */
+.tarjeta::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: var(--color-estado, var(--borde));
+}
+
+.tarjeta-recibida    { --color-estado: var(--tinta-suave); }
+.tarjeta-preparada   { --color-estado: var(--azul); }
+.tarjeta-proceso     { --color-estado: var(--ambar); }
+.tarjeta-listo       { --color-estado: var(--acento); }
+.tarjeta-enviada     { --color-estado: var(--borde); }
+
+.tarjeta-encabezado {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.tarjeta h3 {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.estado {
+  flex-shrink: 0;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--color-estado, var(--tinta-suave));
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  padding: 0.15rem 0.6rem;
+}
+
+.cargo {
+  margin: 0.3rem 0 0.9rem;
+  color: var(--tinta-suave);
+  font-size: 0.92rem;
+}
+
+.detalle {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  margin: 0;
+  padding-top: 0.85rem;
+  border-top: 1px solid var(--borde);
+  font-size: 0.85rem;
+}
+
+.detalle div {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+}
+
+.detalle dt {
+  color: var(--tinta-suave);
+  font-size: 0.75rem;
+}
+
+.detalle dd {
+  margin: 0;
+}
+
+@media (max-width: 34rem) {
+  .detalle {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.filtros {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 1.5rem;
+}
+
+.filtro {
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--tinta-suave);
+  background: transparent;
+  border: 1px solid var(--borde);
+  border-radius: 999px;
+  padding: 0.35rem 0.85rem;
+  cursor: pointer;
+  transition: border-color 120ms, color 120ms;
+}
+
+.filtro:hover {
+  border-color: var(--tinta-suave);
+  color: var(--tinta);
+}
+
+.filtro:focus-visible {
+  outline: 2px solid var(--acento);
+  outline-offset: 2px;
+}
+
+.filtro-activo,
+.filtro-activo:hover {
+  background: var(--tinta);
+  border-color: var(--tinta);
+  color: #fff;
+}
+
+.vacio {
+  color: var(--tinta-suave);
+  font-size: 0.9rem;
+  text-align: center;
+  padding: 3rem 0;
+  border: 1px dashed var(--borde);
+  border-radius: 6px;
+}
+.formulario {
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: 6px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.formulario h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.fila {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.fila .campo {
+  flex: 1 1 14rem;
+}
+
+.campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.campo label {
+  font-size: 0.82rem;
+  color: var(--tinta-suave);
+}
+
+.campo input,
+.campo select {
+  font: inherit;
+  font-size: 0.92rem;
+  color: var(--tinta);
+  background: var(--fondo);
+  border: 1px solid var(--borde);
+  border-radius: 4px;
+  padding: 0.55rem 0.7rem;
+}
+
+.campo input:focus,
+.campo select:focus {
+  outline: 2px solid var(--acento);
+  outline-offset: -1px;
+  background: var(--superficie);
+}
+
+.error {
+  font-size: 0.78rem;
+  color: #a8324a;
+}
+
+.ayuda {
+  font-size: 0.78rem;
+  color: var(--tinta-suave);
+}
+
+.acciones {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+  padding-top: 0.5rem;
+}
+
+.boton-primario,
+.boton-secundario {
+  font: inherit;
+  font-size: 0.88rem;
+  border-radius: 4px;
+  padding: 0.55rem 1.1rem;
+  cursor: pointer;
+  border: 1px solid transparent;
+}
+
+.boton-primario {
+  background: var(--acento);
+  color: #fff;
+}
+
+.boton-primario:hover {
+  background: #0c5b52;
+}
+
+.boton-secundario {
+  background: transparent;
+  border-color: var(--borde);
+  color: var(--tinta-suave);
+}
+
+.boton-secundario:hover {
+  border-color: var(--tinta-suave);
+  color: var(--tinta);
+}
+
+.tarjeta {
+  cursor: pointer;
+}
+
+.tarjeta:hover {
+  border-color: var(--tinta-suave);
+}
+
+.panel {
+  background: var(--superficie);
+  border: 1px solid var(--borde);
+  border-radius: 6px;
+  padding: 1.75rem;
+}
+
+.panel-cabecera {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 1.25rem;
+  border-bottom: 1px solid var(--borde);
+}
+
+.panel-cabecera h2 {
+  margin: 0 0 0.2rem;
+  font-size: 1.4rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.bloque {
+  padding-top: 1.5rem;
+}
+
+.bloque h3 {
+  margin: 0 0 0.6rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.ruta {
+  font-family: ui-monospace, monospace;
+  font-size: 0.82rem;
+  color: var(--acento);
+  background: var(--fondo);
+  border-radius: 4px;
+  padding: 0.5rem 0.7rem;
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+.archivos {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  border: 1px solid var(--borde);
+  border-radius: 4px;
+}
+
+.archivos li {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0.7rem 0.9rem;
+  font-size: 0.87rem;
+  border-bottom: 1px solid var(--borde);
+}
+
+.archivos li:last-child {
+  border-bottom: none;
+}
+
+.archivo-nombre {
+  flex: 1;
+  font-weight: 500;
+}
+
+.archivo-tipo {
+  font-size: 0.75rem;
+  color: var(--acento);
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  padding: 0.1rem 0.55rem;
+}
+
+.archivo-origen {
+  color: var(--tinta-suave);
+  font-size: 0.8rem;
+}
