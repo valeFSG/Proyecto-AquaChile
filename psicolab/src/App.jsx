@@ -1,31 +1,19 @@
-import { Routes, Route, NavLink } from 'react-router-dom'
-import Bandeja from './pages/Bandeja'
+import { Routes, Route } from 'react-router-dom'
+import BarraLateral from './components/BarraLateral'
+import Dashboard from './pages/Dashboard'
 import Solicitar from './pages/Solicitar'
 
 function App() {
   return (
-    <>
-      <nav className="navbar navbar-expand navbar-dark bg-dark">
-        <div className="container">
-          <span className="navbar-brand">Evaluación psicolaboral</span>
-          <div className="navbar-nav">
-            <NavLink className="nav-link" to="/" end>
-              Bandeja
-            </NavLink>
-            <NavLink className="nav-link" to="/solicitar">
-              Solicitar
-            </NavLink>
-          </div>
-        </div>
-      </nav>
-
-      <main className="container py-4">
+    <div className="layout">
+      <BarraLateral />
+      <main className="contenido">
         <Routes>
-          <Route path="/" element={<Bandeja />} />
+          <Route path="/" element={<Dashboard />} />
           <Route path="/solicitar" element={<Solicitar />} />
         </Routes>
       </main>
-    </>
+    </div>
   )
 }
 
