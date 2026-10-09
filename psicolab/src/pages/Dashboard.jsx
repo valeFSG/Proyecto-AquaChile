@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
 import { ETAPAS, TIPOS, PASOS_EVALUACION } from '../data/solicitudes'
-import { obtenerSolicitudes } from '../lib/api'
 import MetricaResumen from '../components/MetricaResumen'
 import ColumnaKanban from '../components/ColumnaKanban'
 import DetalleSolicitud from '../components/DetalleSolicitud'
+import { obtenerSolicitudes, actualizarSolicitud } from '../lib/api'
 
 const COLOR_COLUMNA = {
   [ETAPAS.CANDIDATOS]: 'cian',
@@ -44,11 +44,50 @@ function Dashboard() {
   const porcentajeInternos =
     activas.length === 0 ? 0 : Math.round((internos.length / activas.length) * 100)
 
+  function reemplazar(actualizada) {
+    setSolicitudes((previas) =>
+      previas.map((s) => (s.id === actualizada.id ? actualizada : s)),
+    )
+  }
+
+  async function avanzar(id, etapa) {
+    try {
+      const actualizada = await actualizarSolicitud(id, { etapa })
+      reemplazar(actualizada)
+      setSeleccionada(actualizada)
+    } catch (err) {
+      setError(err.message)
+    }
+  }
+
+  async function cambiarPaso(id, paso) {
+    try {
+      const actualizada = await actualizarSolicitud(id, { paso })
+      reemplazar(actualizada)
+      setSeleccionada(actualizada)
+    } catch (err) {
+      setError(err.message)
+    }
+  }
+
+  async function descartar(id) {
+    try {
+      const actualizada = await actualizarSolicitud(id, { descartada: true })
+      reemplazar(actualizada)
+      setSeleccionada(null)
+    } catch (err) {
+      setError(err.message)
+    }
+  }
+
   if (seleccionada) {
     return (
       <DetalleSolicitud
         solicitud={seleccionada}
         onCerrar={() => setSeleccionada(null)}
+        onAvanzar={avanzar}
+        onDescartar={descartar}
+        onCambiarPaso={cambiarPaso}
       />
     )
   }
