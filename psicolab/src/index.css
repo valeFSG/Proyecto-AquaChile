@@ -207,3 +207,97 @@ body {
   font-size: .88rem;
   max-width: 46rem;
 }
+
+.btn-volver {
+  background: transparent;
+  border: none;
+  color: var(--texto-sec);
+  font: inherit;
+  font-size: .85rem;
+  padding: 0;
+  cursor: pointer;
+}
+.btn-volver:hover { color: var(--cian); }
+
+.bloque {
+  background: var(--panel);
+  border: 1px solid var(--linea);
+  border-radius: 14px;
+  padding: 1.25rem 1.4rem;
+}
+
+.bloque-titulo {
+  font-size: .9rem;
+  font-weight: 600;
+  margin: 0 0 1rem;
+}
+
+.dato-label { font-size: .72rem; color: var(--texto-sec); margin-bottom: .2rem; }
+.dato-valor { font-size: .88rem; }
+
+.ruta {
+  font-family: ui-monospace, monospace;
+  font-size: .8rem;
+  color: var(--cian);
+  background: var(--panel-alto);
+  border-radius: 8px;
+  padding: .6rem .8rem;
+  margin: 0 0 1rem;
+  overflow-x: auto;
+}
+
+.archivos { border: 1px solid var(--linea); border-radius: 10px; overflow: hidden; }
+
+.archivo {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: .7rem .9rem;
+  font-size: .85rem;
+  border-bottom: 1px solid var(--linea);
+}
+.archivo:last-child { border-bottom: none; }
+.archivo-nombre { flex: 1; font-weight: 500; }
+.archivo-tipo {
+  font-size: .68rem;
+  color: var(--cian);
+  background: rgba(34,211,238,.12);
+  padding: .12rem .5rem;
+  border-radius: 999px;
+}
+.archivo-origen { font-size: .76rem; color: var(--texto-sec); }
+
+.pasos { display: flex; flex-wrap: wrap; gap: .4rem; }
+
+.paso {
+  background: var(--panel-alto);
+  border: 1px solid var(--linea);
+  border-radius: 999px;
+  padding: .35rem .8rem;
+  color: var(--texto-sec);
+  font: inherit;
+  font-size: .76rem;
+  cursor: pointer;
+  transition: all .15s;
+}
+.paso:hover:not(:disabled) { border-color: var(--texto-sec); color: var(--texto); }
+.paso.activo {
+  background: rgba(163,230,53,.12);
+  border-color: var(--lima);
+  color: var(--lima);
+  font-weight: 600;
+}
+.paso:disabled { opacity: .5; cursor: default; }
+
+.btn-descartar {
+  background: transparent;
+  border: 1px solid rgba(251,113,133,.35);
+  border-radius: 9px;
+  padding: .55rem 1.1rem;
+  color: var(--rosa);
+  font: inherit;
+  font-size: .85rem;
+  cursor: pointer;
+}
+.btn-descartar:hover:not(:disabled) { background: rgba(251,113,133,.1); }
+.btn-descartar:disabled { opacity: .5; cursor: default; }
