@@ -18,7 +18,8 @@ let solicitudes = [
     id: '1',
     tipo: 'Externo',
     candidato: 'María Fernanda Soto',
-    rut: '18.452.339-1',
+    correo: 'maria.soto@correo.cl',
+    telefono: '+56 9 8412 7730',
     familiaCargo: 'Operaciones',
     cargo: 'Jefe de Turno Planta',
     analista: 'Camila Rojas',
@@ -31,7 +32,8 @@ let solicitudes = [
     id: '2',
     tipo: 'Interno',
     candidato: 'Juan Pablo Márquez',
-    rut: '16.903.117-K',
+    correo: 'jp.marquez@correo.cl',
+    telefono: '+56 9 7765 2214',
     familiaCargo: 'Administración',
     cargo: 'Analista de Compras',
     areaActual: 'Bodega',
@@ -47,7 +49,8 @@ let solicitudes = [
     id: '3',
     tipo: 'Externo',
     candidato: 'Ignacia Vera Muñoz',
-    rut: '19.774.028-5',
+    correo: 'ignacia.vera@correo.cl',
+    telefono: '+56 9 6238 9015',
     familiaCargo: 'Mantención',
     cargo: 'Supervisor Eléctrico',
     analista: 'Diego Fuentes',
@@ -61,7 +64,8 @@ let solicitudes = [
     id: '4',
     tipo: 'Interno',
     candidato: 'Rodrigo Pinto Lagos',
-    rut: '17.228.604-9',
+    correo: 'r.pinto@correo.cl',
+    telefono: '+56 9 5590 4471',
     familiaCargo: 'Operaciones',
     cargo: 'Supervisor de Línea',
     areaActual: 'Planta 2',
@@ -81,12 +85,16 @@ app.get('/api/solicitudes', (req, res) => {
 
 app.post('/api/solicitudes', (req, res) => {
   const {
-    tipo, candidato, rut, familiaCargo, cargo, analista, nombreCv,
+    tipo, candidato, correo, telefono, familiaCargo, cargo, analista, nombreCv,
     areaActual, cargoActual, antiguedadAnios,
   } = req.body
 
-  if (!candidato || !familiaCargo || !cargo || !analista) {
+  if (!candidato || !correo || !familiaCargo || !cargo || !analista) {
     return res.status(400).json({ error: 'Faltan datos obligatorios.' })
+  }
+
+  if (!correo.includes('@')) {
+    return res.status(400).json({ error: 'El correo no es válido.' })
   }
 
   if (tipo === 'Interno' && (!areaActual || !cargoActual)) {
@@ -99,7 +107,8 @@ app.post('/api/solicitudes', (req, res) => {
     id: crypto.randomUUID(),
     tipo: tipo ?? 'Externo',
     candidato,
-    rut: rut ?? '',
+    correo,
+    telefono: telefono ?? '',
     familiaCargo,
     cargo,
     analista,

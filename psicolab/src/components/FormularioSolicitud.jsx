@@ -5,7 +5,8 @@ import { TIPOS } from '../data/solicitudes'
 const VALORES_INICIALES = {
   tipo: TIPOS.EXTERNO,
   candidato: '',
-  rut: '',
+  correo: '',
+  telefono: '',
   familiaCargo: '',
   cargo: '',
   analista: '',
@@ -29,7 +30,13 @@ function FormularioSolicitud({ onCrear, onCancelar }) {
   function validar() {
     const nuevos = {}
     if (!valores.candidato.trim()) nuevos.candidato = 'Escribe el nombre.'
-    if (!valores.rut.trim()) nuevos.rut = 'Escribe el RUT.'
+
+    if (!valores.correo.trim()) {
+      nuevos.correo = 'Escribe el correo.'
+    } else if (!valores.correo.includes('@')) {
+      nuevos.correo = 'El correo no es válido.'
+    }
+
     if (!valores.familiaCargo) nuevos.familiaCargo = 'Elige una familia de cargo.'
     if (!valores.cargo.trim()) nuevos.cargo = 'Escribe el cargo al que postula.'
     if (!valores.analista.trim()) nuevos.analista = 'Indica quién solicita.'
@@ -39,6 +46,10 @@ function FormularioSolicitud({ onCrear, onCancelar }) {
       if (!valores.cargoActual.trim()) nuevos.cargoActual = 'Indica el cargo actual.'
     } else if (!cv) {
       nuevos.cv = 'Adjunta el CV del candidato.'
+    }
+
+    if (cv && !cv.name.toLowerCase().endsWith('.pdf')) {
+      nuevos.cv = 'El CV debe ser un archivo PDF.'
     }
 
     return nuevos
@@ -85,13 +96,24 @@ function FormularioSolicitud({ onCrear, onCancelar }) {
         </div>
 
         <div className="col-12 col-md-5">
-          <label className="campo-label" htmlFor="rut">RUT</label>
+          <label className="campo-label" htmlFor="correo">Correo electrónico</label>
           <input
-            id="rut" name="rut" className="campo-input"
-            value={valores.rut} onChange={cambiar}
-            placeholder="12.345.678-9"
+            id="correo" name="correo" type="email" className="campo-input"
+            value={valores.correo} onChange={cambiar}
+            placeholder="nombre@correo.cl"
           />
-          {errores.rut && <span className="campo-error">{errores.rut}</span>}
+          {errores.correo && <span className="campo-error">{errores.correo}</span>}
+        </div>
+
+        <div className="col-12 col-md-4">
+          <label className="campo-label" htmlFor="telefono">
+            Teléfono <span className="campo-opcional">opcional</span>
+          </label>
+          <input
+            id="telefono" name="telefono" className="campo-input"
+            value={valores.telefono} onChange={cambiar}
+            placeholder="+56 9 1234 5678"
+          />
         </div>
 
         {esInterno && (
@@ -106,7 +128,7 @@ function FormularioSolicitud({ onCrear, onCancelar }) {
               {errores.areaActual && <span className="campo-error">{errores.areaActual}</span>}
             </div>
 
-            <div className="col-12 col-md-5">
+            <div className="col-12 col-md-4">
               <label className="campo-label" htmlFor="cargoActual">Cargo actual</label>
               <input
                 id="cargoActual" name="cargoActual" className="campo-input"
@@ -116,7 +138,7 @@ function FormularioSolicitud({ onCrear, onCancelar }) {
               {errores.cargoActual && <span className="campo-error">{errores.cargoActual}</span>}
             </div>
 
-            <div className="col-12 col-md-3">
+            <div className="col-12 col-md-4">
               <label className="campo-label" htmlFor="antiguedadAnios">Años en la empresa</label>
               <input
                 id="antiguedadAnios" name="antiguedadAnios" type="number" min="0"
@@ -128,7 +150,7 @@ function FormularioSolicitud({ onCrear, onCancelar }) {
           </>
         )}
 
-        <div className="col-12 col-md-5">
+        <div className="col-12 col-md-4">
           <label className="campo-label" htmlFor="familiaCargo">Familia de cargo</label>
           <select
             id="familiaCargo" name="familiaCargo" className="campo-input"
@@ -142,7 +164,7 @@ function FormularioSolicitud({ onCrear, onCancelar }) {
           {errores.familiaCargo && <span className="campo-error">{errores.familiaCargo}</span>}
         </div>
 
-        <div className="col-12 col-md-7">
+        <div className="col-12 col-md-4">
           <label className="campo-label" htmlFor="cargo">Cargo al que postula</label>
           <input
             id="cargo" name="cargo" className="campo-input"
@@ -164,10 +186,11 @@ function FormularioSolicitud({ onCrear, onCancelar }) {
 
         <div className="col-12 col-md-6">
           <label className="campo-label" htmlFor="cv">
-            Curriculum vitae {esInterno && <span className="campo-opcional">opcional</span>}
+            Curriculum vitae (PDF)
+            {esInterno && <span className="campo-opcional"> opcional</span>}
           </label>
           <input
-            id="cv" name="cv" type="file" accept=".pdf,.doc,.docx"
+            id="cv" name="cv" type="file" accept=".pdf"
             className="campo-input"
             onChange={(e) => setCv(e.target.files[0] ?? null)}
           />

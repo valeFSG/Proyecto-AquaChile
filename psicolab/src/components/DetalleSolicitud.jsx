@@ -46,19 +46,23 @@ function DetalleSolicitud({ solicitud, onCerrar, onAvanzar, onDescartar }) {
       <div className="bloque mb-3">
         <h2 className="bloque-titulo">Datos de la solicitud</h2>
         <div className="row g-3">
-          <div className="col-6 col-md-3">
-            <div className="dato-label">RUT</div>
-            <div className="dato-valor">{solicitud.rut || '—'}</div>
+          <div className="col-12 col-md-5">
+            <div className="dato-label">Correo</div>
+            <div className="dato-valor">{solicitud.correo || '—'}</div>
           </div>
           <div className="col-6 col-md-3">
+            <div className="dato-label">Teléfono</div>
+            <div className="dato-valor">{solicitud.telefono || '—'}</div>
+          </div>
+          <div className="col-6 col-md-4">
             <div className="dato-label">Solicitó</div>
             <div className="dato-valor">{solicitud.analista}</div>
           </div>
-          <div className="col-6 col-md-3">
-            <div className="dato-label">Fecha</div>
+          <div className="col-6 col-md-4">
+            <div className="dato-label">Fecha de solicitud</div>
             <div className="dato-valor">{solicitud.fechaSolicitud}</div>
           </div>
-          <div className="col-6 col-md-3">
+          <div className="col-6 col-md-4">
             <div className="dato-label">Etapa</div>
             <div className="dato-valor">{solicitud.etapa}</div>
           </div>
