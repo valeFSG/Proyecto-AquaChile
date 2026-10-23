@@ -7,17 +7,10 @@ app.use(cors())
 app.use(express.json())
 
 const ETAPAS = {
-  CANDIDATOS: 'Candidatos',
-  EVALUACION: 'Evaluación',
-  CONTRATACION: 'Contratación',
-}
-
-const PASOS = {
-  PENDIENTE: 'Carpeta pendiente',
-  PREPARADA: 'Carpeta lista',
-  ENTREVISTA: 'Entrevista realizada',
-  INFORME: 'Informe en revisión',
-  APROBADO: 'Informe aprobado',
+  RECIBIDA: 'Evaluación recibida',
+  AGENDADA: 'Entrevista agendada',
+  REALIZADA: 'Entrevista realizada',
+  ENVIADA: 'Informe enviado',
 }
 
 let solicitudes = [
@@ -30,8 +23,7 @@ let solicitudes = [
     cargo: 'Jefe de Turno Planta',
     analista: 'Camila Rojas',
     nombreCv: 'cv-maria-soto.pdf',
-    etapa: ETAPAS.CANDIDATOS,
-    paso: PASOS.PENDIENTE,
+    etapa: ETAPAS.RECIBIDA,
     descartada: false,
     fechaSolicitud: '2026-09-01',
   },
@@ -47,8 +39,7 @@ let solicitudes = [
     antiguedadAnios: 4,
     analista: 'Camila Rojas',
     nombreCv: 'cv-jp-marquez.pdf',
-    etapa: ETAPAS.EVALUACION,
-    paso: PASOS.ENTREVISTA,
+    etapa: ETAPAS.REALIZADA,
     descartada: false,
     fechaSolicitud: '2026-08-28',
   },
@@ -61,8 +52,8 @@ let solicitudes = [
     cargo: 'Supervisor Eléctrico',
     analista: 'Diego Fuentes',
     nombreCv: 'cv-ignacia-vera.pdf',
-    etapa: ETAPAS.CONTRATACION,
-    paso: PASOS.APROBADO,
+    etapa: ETAPAS.ENVIADA,
+    categoria: 'Recomendado',
     descartada: false,
     fechaSolicitud: '2026-08-25',
   },
@@ -78,8 +69,7 @@ let solicitudes = [
     antiguedadAnios: 6,
     analista: 'Diego Fuentes',
     nombreCv: 'cv-rodrigo-pinto.pdf',
-    etapa: ETAPAS.CANDIDATOS,
-    paso: PASOS.PENDIENTE,
+    etapa: ETAPAS.AGENDADA,
     descartada: false,
     fechaSolicitud: '2026-09-10',
   },
@@ -95,7 +85,7 @@ app.post('/api/solicitudes', (req, res) => {
     areaActual, cargoActual, antiguedadAnios,
   } = req.body
 
-  if (!candidato || !rut || !familiaCargo || !cargo || !analista) {
+  if (!candidato || !familiaCargo || !cargo || !analista) {
     return res.status(400).json({ error: 'Faltan datos obligatorios.' })
   }
 
@@ -109,13 +99,12 @@ app.post('/api/solicitudes', (req, res) => {
     id: crypto.randomUUID(),
     tipo: tipo ?? 'Externo',
     candidato,
-    rut,
+    rut: rut ?? '',
     familiaCargo,
     cargo,
     analista,
     nombreCv: nombreCv ?? '',
-    etapa: ETAPAS.CANDIDATOS,
-    paso: PASOS.PENDIENTE,
+    etapa: ETAPAS.RECIBIDA,
     descartada: false,
     fechaSolicitud: new Date().toISOString().slice(0, 10),
   }
@@ -131,7 +120,7 @@ app.post('/api/solicitudes', (req, res) => {
 })
 
 app.patch('/api/solicitudes/:id', (req, res) => {
-  const { etapa, paso, descartada } = req.body
+  const { etapa, descartada, categoria, observaciones, fechaEvaluacion } = req.body
   const indice = solicitudes.findIndex((s) => s.id === req.params.id)
 
   if (indice === -1) {
@@ -142,8 +131,10 @@ app.patch('/api/solicitudes/:id', (req, res) => {
   const actualizada = {
     ...actual,
     etapa: etapa ?? actual.etapa,
-    paso: paso ?? actual.paso,
     descartada: descartada ?? actual.descartada,
+    categoria: categoria ?? actual.categoria,
+    observaciones: observaciones ?? actual.observaciones,
+    fechaEvaluacion: fechaEvaluacion ?? actual.fechaEvaluacion,
   }
 
   solicitudes[indice] = actualizada

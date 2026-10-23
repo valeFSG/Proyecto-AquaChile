@@ -1,14 +1,15 @@
 import { useState, useEffect } from 'react'
-import { ETAPAS, TIPOS, PASOS_EVALUACION } from '../data/solicitudes'
+import { ETAPAS, TIPOS } from '../data/solicitudes'
+import { obtenerSolicitudes, actualizarSolicitud } from '../lib/api'
 import MetricaResumen from '../components/MetricaResumen'
 import ColumnaKanban from '../components/ColumnaKanban'
 import DetalleSolicitud from '../components/DetalleSolicitud'
-import { obtenerSolicitudes, actualizarSolicitud } from '../lib/api'
 
 const COLOR_COLUMNA = {
-  [ETAPAS.CANDIDATOS]: 'cian',
-  [ETAPAS.EVALUACION]: 'ambar',
-  [ETAPAS.CONTRATACION]: 'lima',
+  [ETAPAS.RECIBIDA]: 'cian',
+  [ETAPAS.AGENDADA]: 'ambar',
+  [ETAPAS.REALIZADA]: 'violeta',
+  [ETAPAS.ENVIADA]: 'lima',
 }
 
 function areaConMasDemanda(solicitudes) {
@@ -31,14 +32,14 @@ function Dashboard() {
 
   useEffect(() => {
     obtenerSolicitudes()
-      .then((datos) => setSolicitudes(datos))
+      .then(setSolicitudes)
       .catch((err) => setError(err.message))
       .finally(() => setCargando(false))
   }, [])
 
   const activas = solicitudes.filter((s) => !s.descartada)
   const internos = activas.filter((s) => s.tipo === TIPOS.INTERNO)
-  const aprobados = activas.filter((s) => s.paso === PASOS_EVALUACION.APROBADO)
+  const enviados = activas.filter((s) => s.etapa === ETAPAS.ENVIADA)
   const area = areaConMasDemanda(activas)
 
   const porcentajeInternos =
@@ -53,16 +54,6 @@ function Dashboard() {
   async function avanzar(id, etapa) {
     try {
       const actualizada = await actualizarSolicitud(id, { etapa })
-      reemplazar(actualizada)
-      setSeleccionada(actualizada)
-    } catch (err) {
-      setError(err.message)
-    }
-  }
-
-  async function cambiarPaso(id, paso) {
-    try {
-      const actualizada = await actualizarSolicitud(id, { paso })
       reemplazar(actualizada)
       setSeleccionada(actualizada)
     } catch (err) {
@@ -87,7 +78,6 @@ function Dashboard() {
         onCerrar={() => setSeleccionada(null)}
         onAvanzar={avanzar}
         onDescartar={descartar}
-        onCambiarPaso={cambiarPaso}
       />
     )
   }
@@ -96,21 +86,21 @@ function Dashboard() {
     <>
       <div className="d-flex justify-content-between align-items-start flex-wrap gap-3 mb-4">
         <div>
-          <h1 className="titulo">Proceso de selección</h1>
+          <h1 className="titulo">Evaluaciones psicolaborales</h1>
           <p className="subtitulo">
-            {activas.length} candidatos activos en el pipeline
+            {activas.length} solicitudes activas
           </p>
         </div>
       </div>
 
-      {error && <div className="alert alert-danger">{error}</div>}
+      {error && <div className="mensaje-error mb-3">{error}</div>}
 
       <div className="row g-3 mb-4">
         <div className="col-6 col-xl-3">
           <MetricaResumen
             etiqueta="En proceso"
             valor={activas.length}
-            nota="Candidatos sin descartar"
+            nota="Solicitudes sin descartar"
             color="cian"
           />
         </div>
@@ -124,15 +114,15 @@ function Dashboard() {
         </div>
         <div className="col-6 col-xl-3">
           <MetricaResumen
-            etiqueta="Informes aprobados"
-            valor={aprobados.length}
-            nota="Listos para contratación"
+            etiqueta="Informes enviados"
+            valor={enviados.length}
+            nota="Evaluaciones completadas"
             color="lima"
           />
         </div>
         <div className="col-6 col-xl-3">
           <MetricaResumen
-            etiqueta="Área con más demanda"
+            etiqueta="Familia con más demanda"
             valor={area.nombre}
             nota={`${area.total} de ${activas.length} solicitudes`}
             color="ambar"
@@ -142,11 +132,11 @@ function Dashboard() {
       </div>
 
       {cargando ? (
-        <p className="subtitulo text-center py-5">Cargando candidatos…</p>
+        <p className="subtitulo text-center py-5">Cargando solicitudes…</p>
       ) : (
         <div className="row g-3">
           {Object.values(ETAPAS).map((etapa) => (
-            <div key={etapa} className="col-12 col-lg-4">
+            <div key={etapa} className="col-12 col-md-6 col-xl-3">
               <ColumnaKanban
                 nombre={etapa}
                 color={COLOR_COLUMNA[etapa]}

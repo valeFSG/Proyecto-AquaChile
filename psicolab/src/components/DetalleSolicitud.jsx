@@ -1,13 +1,14 @@
 import { useState } from 'react'
 import { planificarCarpeta } from '../lib/carpeta'
-import { ETAPAS, TIPOS, PASOS_EVALUACION } from '../data/solicitudes'
+import { ETAPAS, TIPOS } from '../data/solicitudes'
 
 const SIGUIENTE_ETAPA = {
-  [ETAPAS.CANDIDATOS]: ETAPAS.EVALUACION,
-  [ETAPAS.EVALUACION]: ETAPAS.CONTRATACION,
+  [ETAPAS.RECIBIDA]: ETAPAS.AGENDADA,
+  [ETAPAS.AGENDADA]: ETAPAS.REALIZADA,
+  [ETAPAS.REALIZADA]: ETAPAS.ENVIADA,
 }
 
-function DetalleSolicitud({ solicitud, onCerrar, onAvanzar, onDescartar, onCambiarPaso }) {
+function DetalleSolicitud({ solicitud, onCerrar, onAvanzar, onDescartar }) {
   const [guardando, setGuardando] = useState(false)
   const { carpeta, archivos } = planificarCarpeta(solicitud)
 
@@ -43,11 +44,11 @@ function DetalleSolicitud({ solicitud, onCerrar, onAvanzar, onDescartar, onCambi
       </div>
 
       <div className="bloque mb-3">
-        <h2 className="bloque-titulo">Datos del candidato</h2>
+        <h2 className="bloque-titulo">Datos de la solicitud</h2>
         <div className="row g-3">
           <div className="col-6 col-md-3">
             <div className="dato-label">RUT</div>
-            <div className="dato-valor">{solicitud.rut}</div>
+            <div className="dato-valor">{solicitud.rut || '—'}</div>
           </div>
           <div className="col-6 col-md-3">
             <div className="dato-label">Solicitó</div>
@@ -81,7 +82,28 @@ function DetalleSolicitud({ solicitud, onCerrar, onAvanzar, onDescartar, onCambi
         )}
       </div>
 
-      <div className="bloque mb-3">
+      {solicitud.categoria && (
+        <div className="bloque mb-3">
+          <h2 className="bloque-titulo">Resultado de la evaluación</h2>
+          <div className="row g-3">
+            <div className="col-12 col-md-5">
+              <div className="dato-label">Categoría</div>
+              <div className="dato-valor">{solicitud.categoria}</div>
+            </div>
+            {solicitud.fechaEvaluacion && (
+              <div className="col-6 col-md-3">
+                <div className="dato-label">Fecha de evaluación</div>
+                <div className="dato-valor">{solicitud.fechaEvaluacion}</div>
+              </div>
+            )}
+          </div>
+          {solicitud.observaciones && (
+            <p className="dato-valor mt-3 mb-0">{solicitud.observaciones}</p>
+          )}
+        </div>
+      )}
+
+      <div className="bloque mb-4">
         <h2 className="bloque-titulo">Carpeta de trabajo</h2>
         <p className="ruta">{carpeta}</p>
 
@@ -92,23 +114,6 @@ function DetalleSolicitud({ solicitud, onCerrar, onAvanzar, onDescartar, onCambi
               <span className="archivo-tipo">{archivo.tipo}</span>
               <span className="archivo-origen">{archivo.origen}</span>
             </div>
-          ))}
-        </div>
-      </div>
-
-      <div className="bloque mb-4">
-        <h2 className="bloque-titulo">Avance de la evaluación</h2>
-        <div className="pasos">
-          {Object.values(PASOS_EVALUACION).map((paso) => (
-            <button
-              key={paso}
-              type="button"
-              className={paso === solicitud.paso ? 'paso activo' : 'paso'}
-              disabled={guardando}
-              onClick={() => accion(() => onCambiarPaso(solicitud.id, paso))}
-            >
-              {paso}
-            </button>
           ))}
         </div>
       </div>

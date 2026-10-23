@@ -1,8 +1,7 @@
-import { TIPOS, ETAPAS } from '../data/solicitudes'
+import { TIPOS } from '../data/solicitudes'
 
 function FichaCandidato({ solicitud, onAbrir }) {
   const esInterno = solicitud.tipo === TIPOS.INTERNO
-  const mostrarPaso = solicitud.etapa !== ETAPAS.CANDIDATOS
 
   return (
     <div className="ficha" role="button" onClick={onAbrir}>
@@ -22,7 +21,9 @@ function FichaCandidato({ solicitud, onAbrir }) {
         </div>
       )}
 
-      {mostrarPaso && <div className="ficha-paso">{solicitud.paso}</div>}
+      {solicitud.categoria && (
+        <div className="ficha-paso">{solicitud.categoria}</div>
+      )}
     </div>
   )
 }
