@@ -11,8 +11,9 @@ function Solicitar() {
     try {
       const payload = {
         tipo: datos.tipo,
-        candidato: datos.candidato,
-        rut: datos.rut,
+        nombre: datos.nombre,
+        correo: datos.correo,
+        telefono: datos.telefono,
         familiaCargo: datos.familiaCargo,
         cargo: datos.cargo,
         analista: datos.analista,
@@ -39,8 +40,8 @@ function Solicitar() {
         <h1 className="titulo mb-3">Solicitud enviada</h1>
         <div className="confirmacion">
           <p className="mb-2">
-            La evaluación de <strong>{enviada.candidato}</strong> quedó
-            registrada como <strong>{enviada.tipo.toLowerCase()}</strong>.
+            La evaluación de <strong>{enviada.candidato?.nombre}</strong> quedó
+            registrada como <strong>{enviada.candidato?.tipo.toLowerCase()}</strong>.
           </p>
           <p className="subtitulo mb-0">
             Postula a {enviada.cargo}, familia {enviada.familiaCargo}.

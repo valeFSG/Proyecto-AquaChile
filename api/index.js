@@ -13,15 +13,49 @@ const ETAPAS = {
   ENVIADA: 'Informe enviado',
 }
 
+let candidatos = [
+  {
+    id: 'c1',
+    nombre: 'María Fernanda Soto',
+    correo: 'maria.soto@correo.cl',
+    telefono: '+56 9 8412 7730',
+    tipo: 'Externo',
+  },
+  {
+    id: 'c2',
+    nombre: 'Juan Pablo Márquez',
+    correo: 'jp.marquez@correo.cl',
+    telefono: '+56 9 7765 2214',
+    tipo: 'Interno',
+    areaActual: 'Bodega',
+    cargoActual: 'Auxiliar de Bodega',
+    antiguedadAnios: 4,
+  },
+  {
+    id: 'c3',
+    nombre: 'Ignacia Vera Muñoz',
+    correo: 'ignacia.vera@correo.cl',
+    telefono: '+56 9 6238 9015',
+    tipo: 'Externo',
+  },
+  {
+    id: 'c4',
+    nombre: 'Rodrigo Pinto Lagos',
+    correo: 'r.pinto@correo.cl',
+    telefono: '+56 9 5590 4471',
+    tipo: 'Interno',
+    areaActual: 'Planta 2',
+    cargoActual: 'Operario de Proceso',
+    antiguedadAnios: 6,
+  },
+]
+
 let solicitudes = [
   {
     id: '1',
-    tipo: 'Externo',
-    candidato: 'María Fernanda Soto',
-    correo: 'maria.soto@correo.cl',
-    telefono: '+56 9 8412 7730',
-    familiaCargo: 'Operaciones',
+    candidatoId: 'c1',
     cargo: 'Jefe de Turno Planta',
+    familiaCargo: 'Operaciones',
     analista: 'Camila Rojas',
     nombreCv: 'cv-maria-soto.pdf',
     etapa: ETAPAS.RECIBIDA,
@@ -30,15 +64,9 @@ let solicitudes = [
   },
   {
     id: '2',
-    tipo: 'Interno',
-    candidato: 'Juan Pablo Márquez',
-    correo: 'jp.marquez@correo.cl',
-    telefono: '+56 9 7765 2214',
-    familiaCargo: 'Administración',
+    candidatoId: 'c2',
     cargo: 'Analista de Compras',
-    areaActual: 'Bodega',
-    cargoActual: 'Auxiliar de Bodega',
-    antiguedadAnios: 4,
+    familiaCargo: 'Administración',
     analista: 'Camila Rojas',
     nombreCv: 'cv-jp-marquez.pdf',
     etapa: ETAPAS.REALIZADA,
@@ -47,30 +75,23 @@ let solicitudes = [
   },
   {
     id: '3',
-    tipo: 'Externo',
-    candidato: 'Ignacia Vera Muñoz',
-    correo: 'ignacia.vera@correo.cl',
-    telefono: '+56 9 6238 9015',
-    familiaCargo: 'Mantención',
+    candidatoId: 'c3',
     cargo: 'Supervisor Eléctrico',
+    familiaCargo: 'Mantención',
     analista: 'Diego Fuentes',
     nombreCv: 'cv-ignacia-vera.pdf',
     etapa: ETAPAS.ENVIADA,
     categoria: 'Recomendado',
+    fechaEvaluacion: '2026-09-03',
+    observaciones: 'Buen manejo técnico y disposición al trabajo en equipo.',
     descartada: false,
     fechaSolicitud: '2026-08-25',
   },
   {
     id: '4',
-    tipo: 'Interno',
-    candidato: 'Rodrigo Pinto Lagos',
-    correo: 'r.pinto@correo.cl',
-    telefono: '+56 9 5590 4471',
-    familiaCargo: 'Operaciones',
+    candidatoId: 'c4',
     cargo: 'Supervisor de Línea',
-    areaActual: 'Planta 2',
-    cargoActual: 'Operario de Proceso',
-    antiguedadAnios: 6,
+    familiaCargo: 'Operaciones',
     analista: 'Diego Fuentes',
     nombreCv: 'cv-rodrigo-pinto.pdf',
     etapa: ETAPAS.AGENDADA,
@@ -79,17 +100,54 @@ let solicitudes = [
   },
 ]
 
+// Une cada solicitud con los datos de su candidato.
+function conCandidato(solicitud) {
+  const candidato = candidatos.find((c) => c.id === solicitud.candidatoId)
+  return { ...solicitud, candidato: candidato ?? null }
+}
+
+app.get('/api/candidatos', (req, res) => {
+  res.json(candidatos)
+})
+
+app.patch('/api/candidatos/:id', (req, res) => {
+  const indice = candidatos.findIndex((c) => c.id === req.params.id)
+  if (indice === -1) {
+    return res.status(404).json({ error: 'Candidato no encontrado.' })
+  }
+
+  const { nombre, correo, telefono, areaActual, cargoActual, antiguedadAnios } = req.body
+
+  if (correo && !correo.includes('@')) {
+    return res.status(400).json({ error: 'El correo no es válido.' })
+  }
+
+  const actual = candidatos[indice]
+  const actualizado = {
+    ...actual,
+    nombre: nombre ?? actual.nombre,
+    correo: correo ?? actual.correo,
+    telefono: telefono ?? actual.telefono,
+    areaActual: areaActual ?? actual.areaActual,
+    cargoActual: cargoActual ?? actual.cargoActual,
+    antiguedadAnios: antiguedadAnios ?? actual.antiguedadAnios,
+  }
+
+  candidatos[indice] = actualizado
+  res.json(actualizado)
+})
+
 app.get('/api/solicitudes', (req, res) => {
-  res.json(solicitudes)
+  res.json(solicitudes.map(conCandidato))
 })
 
 app.post('/api/solicitudes', (req, res) => {
   const {
-    tipo, candidato, correo, telefono, familiaCargo, cargo, analista, nombreCv,
+    tipo, nombre, correo, telefono, familiaCargo, cargo, analista, nombreCv,
     areaActual, cargoActual, antiguedadAnios,
   } = req.body
 
-  if (!candidato || !correo || !familiaCargo || !cargo || !analista) {
+  if (!nombre || !correo || !familiaCargo || !cargo || !analista) {
     return res.status(400).json({ error: 'Faltan datos obligatorios.' })
   }
 
@@ -103,14 +161,34 @@ app.post('/api/solicitudes', (req, res) => {
     })
   }
 
+  // Si la persona ya postuló antes, se reutiliza su registro.
+  let candidato = candidatos.find(
+    (c) => c.correo.toLowerCase() === correo.toLowerCase(),
+  )
+
+  if (!candidato) {
+    candidato = {
+      id: crypto.randomUUID(),
+      nombre,
+      correo,
+      telefono: telefono ?? '',
+      tipo: tipo ?? 'Externo',
+    }
+
+    if (candidato.tipo === 'Interno') {
+      candidato.areaActual = areaActual
+      candidato.cargoActual = cargoActual
+      candidato.antiguedadAnios = Number(antiguedadAnios) || 0
+    }
+
+    candidatos = [candidato, ...candidatos]
+  }
+
   const nueva = {
     id: crypto.randomUUID(),
-    tipo: tipo ?? 'Externo',
-    candidato,
-    correo,
-    telefono: telefono ?? '',
-    familiaCargo,
+    candidatoId: candidato.id,
     cargo,
+    familiaCargo,
     analista,
     nombreCv: nombreCv ?? '',
     etapa: ETAPAS.RECIBIDA,
@@ -118,23 +196,20 @@ app.post('/api/solicitudes', (req, res) => {
     fechaSolicitud: new Date().toISOString().slice(0, 10),
   }
 
-  if (nueva.tipo === 'Interno') {
-    nueva.areaActual = areaActual
-    nueva.cargoActual = cargoActual
-    nueva.antiguedadAnios = Number(antiguedadAnios) || 0
-  }
-
   solicitudes = [nueva, ...solicitudes]
-  res.status(201).json(nueva)
+  res.status(201).json(conCandidato(nueva))
 })
 
 app.patch('/api/solicitudes/:id', (req, res) => {
-  const { etapa, descartada, categoria, observaciones, fechaEvaluacion } = req.body
   const indice = solicitudes.findIndex((s) => s.id === req.params.id)
-
   if (indice === -1) {
     return res.status(404).json({ error: 'Solicitud no encontrada.' })
   }
+
+  const {
+    etapa, descartada, categoria, observaciones, fechaEvaluacion,
+    cargo, familiaCargo, analista,
+  } = req.body
 
   const actual = solicitudes[indice]
   const actualizada = {
@@ -144,10 +219,13 @@ app.patch('/api/solicitudes/:id', (req, res) => {
     categoria: categoria ?? actual.categoria,
     observaciones: observaciones ?? actual.observaciones,
     fechaEvaluacion: fechaEvaluacion ?? actual.fechaEvaluacion,
+    cargo: cargo ?? actual.cargo,
+    familiaCargo: familiaCargo ?? actual.familiaCargo,
+    analista: analista ?? actual.analista,
   }
 
   solicitudes[indice] = actualizada
-  res.json(actualizada)
+  res.json(conCandidato(actualizada))
 })
 
 app.listen(3000, () => {

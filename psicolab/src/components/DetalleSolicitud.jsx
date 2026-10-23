@@ -12,7 +12,8 @@ function DetalleSolicitud({ solicitud, onCerrar, onAvanzar, onDescartar }) {
   const [guardando, setGuardando] = useState(false)
   const { carpeta, archivos } = planificarCarpeta(solicitud)
 
-  const esInterno = solicitud.tipo === TIPOS.INTERNO
+  const candidato = solicitud.candidato
+  const esInterno = candidato?.tipo === TIPOS.INTERNO
   const siguiente = SIGUIENTE_ETAPA[solicitud.etapa]
 
   async function accion(fn) {
@@ -33,27 +34,50 @@ function DetalleSolicitud({ solicitud, onCerrar, onAvanzar, onDescartar }) {
 
       <div className="d-flex justify-content-between align-items-start gap-3 flex-wrap mt-3 mb-4">
         <div>
-          <h1 className="titulo">{solicitud.candidato}</h1>
+          <h1 className="titulo">{candidato?.nombre ?? 'Sin candidato'}</h1>
           <p className="subtitulo">
             Postula a {solicitud.cargo} · {solicitud.familiaCargo}
           </p>
         </div>
         <span className={esInterno ? 'pill pill-int' : 'pill pill-ext'}>
-          {solicitud.tipo}
+          {candidato?.tipo}
         </span>
+      </div>
+
+      <div className="bloque mb-3">
+        <h2 className="bloque-titulo">Datos del candidato</h2>
+        <div className="row g-3">
+          <div className="col-12 col-md-6">
+            <div className="dato-label">Correo</div>
+            <div className="dato-valor">{candidato?.correo || '—'}</div>
+          </div>
+          <div className="col-12 col-md-6">
+            <div className="dato-label">Teléfono</div>
+            <div className="dato-valor">{candidato?.telefono || '—'}</div>
+          </div>
+        </div>
+
+        {esInterno && (
+          <div className="row g-3 mt-1 pt-3" style={{ borderTop: '1px solid var(--linea)' }}>
+            <div className="col-6 col-md-4">
+              <div className="dato-label">Área actual</div>
+              <div className="dato-valor">{candidato.areaActual}</div>
+            </div>
+            <div className="col-6 col-md-5">
+              <div className="dato-label">Cargo actual</div>
+              <div className="dato-valor">{candidato.cargoActual}</div>
+            </div>
+            <div className="col-6 col-md-3">
+              <div className="dato-label">Antigüedad</div>
+              <div className="dato-valor">{candidato.antiguedadAnios} años</div>
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="bloque mb-3">
         <h2 className="bloque-titulo">Datos de la solicitud</h2>
         <div className="row g-3">
-          <div className="col-12 col-md-5">
-            <div className="dato-label">Correo</div>
-            <div className="dato-valor">{solicitud.correo || '—'}</div>
-          </div>
-          <div className="col-6 col-md-3">
-            <div className="dato-label">Teléfono</div>
-            <div className="dato-valor">{solicitud.telefono || '—'}</div>
-          </div>
           <div className="col-6 col-md-4">
             <div className="dato-label">Solicitó</div>
             <div className="dato-valor">{solicitud.analista}</div>
@@ -67,23 +91,6 @@ function DetalleSolicitud({ solicitud, onCerrar, onAvanzar, onDescartar }) {
             <div className="dato-valor">{solicitud.etapa}</div>
           </div>
         </div>
-
-        {esInterno && (
-          <div className="row g-3 mt-1 pt-3" style={{ borderTop: '1px solid var(--linea)' }}>
-            <div className="col-6 col-md-4">
-              <div className="dato-label">Área actual</div>
-              <div className="dato-valor">{solicitud.areaActual}</div>
-            </div>
-            <div className="col-6 col-md-5">
-              <div className="dato-label">Cargo actual</div>
-              <div className="dato-valor">{solicitud.cargoActual}</div>
-            </div>
-            <div className="col-6 col-md-3">
-              <div className="dato-label">Antigüedad</div>
-              <div className="dato-valor">{solicitud.antiguedadAnios} años</div>
-            </div>
-          </div>
-        )}
       </div>
 
       {solicitud.categoria && (
@@ -95,7 +102,7 @@ function DetalleSolicitud({ solicitud, onCerrar, onAvanzar, onDescartar }) {
               <div className="dato-valor">{solicitud.categoria}</div>
             </div>
             {solicitud.fechaEvaluacion && (
-              <div className="col-6 col-md-3">
+              <div className="col-6 col-md-4">
                 <div className="dato-label">Fecha de evaluación</div>
                 <div className="dato-valor">{solicitud.fechaEvaluacion}</div>
               </div>

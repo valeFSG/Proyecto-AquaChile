@@ -38,7 +38,7 @@ function Dashboard() {
   }, [])
 
   const activas = solicitudes.filter((s) => !s.descartada)
-  const internos = activas.filter((s) => s.tipo === TIPOS.INTERNO)
+  const internos = activas.filter((s) => s.candidato?.tipo === TIPOS.INTERNO)
   const enviados = activas.filter((s) => s.etapa === ETAPAS.ENVIADA)
   const area = areaConMasDemanda(activas)
 

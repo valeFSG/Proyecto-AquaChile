@@ -11,11 +11,13 @@ export function normalizarNombre(nombre) {
     .replace(/^-|-$/g, '')
 }
 
-// Dada una solicitud, devuelve la carpeta y los archivos
-// que el sistema debe dejar preparados.
+// Dada una solicitud con su candidato, devuelve la carpeta
+// y los archivos que el sistema debe dejar preparados.
 export function planificarCarpeta(solicitud) {
   const familia = FAMILIAS.find((f) => f.nombre === solicitud.familiaCargo)
-  const carpeta = `/Evaluaciones/${solicitud.fechaSolicitud.slice(0, 7)}/${normalizarNombre(solicitud.candidato)}`
+  const nombre = normalizarNombre(solicitud.candidato?.nombre ?? '')
+  const mes = solicitud.fechaSolicitud.slice(0, 7)
+  const carpeta = `/Evaluaciones/${mes}/${nombre}`
 
   const archivos = [
     {

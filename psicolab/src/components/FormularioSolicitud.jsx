@@ -4,7 +4,7 @@ import { TIPOS } from '../data/solicitudes'
 
 const VALORES_INICIALES = {
   tipo: TIPOS.EXTERNO,
-  candidato: '',
+  nombre: '',
   correo: '',
   telefono: '',
   familiaCargo: '',
@@ -29,7 +29,7 @@ function FormularioSolicitud({ onCrear, onCancelar }) {
 
   function validar() {
     const nuevos = {}
-    if (!valores.candidato.trim()) nuevos.candidato = 'Escribe el nombre.'
+    if (!valores.nombre.trim()) nuevos.nombre = 'Escribe el nombre.'
 
     if (!valores.correo.trim()) {
       nuevos.correo = 'Escribe el correo.'
@@ -86,13 +86,13 @@ function FormularioSolicitud({ onCrear, onCancelar }) {
 
       <div className="row g-3">
         <div className="col-12 col-md-7">
-          <label className="campo-label" htmlFor="candidato">Nombre completo</label>
+          <label className="campo-label" htmlFor="nombre">Nombre completo</label>
           <input
-            id="candidato" name="candidato" className="campo-input"
-            value={valores.candidato} onChange={cambiar}
+            id="nombre" name="nombre" className="campo-input"
+            value={valores.nombre} onChange={cambiar}
             placeholder="Nombre y apellidos"
           />
-          {errores.candidato && <span className="campo-error">{errores.candidato}</span>}
+          {errores.nombre && <span className="campo-error">{errores.nombre}</span>}
         </div>
 
         <div className="col-12 col-md-5">

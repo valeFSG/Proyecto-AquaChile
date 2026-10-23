@@ -26,12 +26,13 @@ function Candidatos() {
       if (estado === 'Descartados') return s.descartada
       return true
     })
-    .filter((s) => tipo === 'Todos' || s.tipo === tipo)
+    .filter((s) => tipo === 'Todos' || s.candidato?.tipo === tipo)
     .filter((s) => {
       const texto = busqueda.trim().toLowerCase()
       if (!texto) return true
       return (
-        s.candidato.toLowerCase().includes(texto) ||
+        (s.candidato?.nombre ?? '').toLowerCase().includes(texto) ||
+        (s.candidato?.correo ?? '').toLowerCase().includes(texto) ||
         s.cargo.toLowerCase().includes(texto)
       )
     })
@@ -98,7 +99,7 @@ function Candidatos() {
           <input
             type="search"
             className="campo-input"
-            placeholder="Nombre o cargo"
+            placeholder="Nombre, correo o cargo"
             value={busqueda}
             onChange={(e) => setBusqueda(e.target.value)}
           />
@@ -117,6 +118,7 @@ function Candidatos() {
             <thead>
               <tr>
                 <th>Candidato</th>
+                <th>Correo</th>
                 <th>Cargo</th>
                 <th>Tipo</th>
                 <th>Etapa</th>
@@ -126,15 +128,18 @@ function Candidatos() {
             <tbody>
               {visibles.map((s) => (
                 <tr key={s.id} className={s.descartada ? 'fila-descartada' : ''}>
-                  <td>{s.candidato}</td>
+                  <td>{s.candidato?.nombre ?? '—'}</td>
+                  <td className="celda-mono">{s.candidato?.correo ?? '—'}</td>
                   <td>{s.cargo}</td>
                   <td>
                     <span
                       className={
-                        s.tipo === TIPOS.INTERNO ? 'pill pill-int' : 'pill pill-ext'
+                        s.candidato?.tipo === TIPOS.INTERNO
+                          ? 'pill pill-int'
+                          : 'pill pill-ext'
                       }
                     >
-                      {s.tipo}
+                      {s.candidato?.tipo}
                     </span>
                   </td>
                   <td>{s.descartada ? 'Descartado' : s.etapa}</td>
