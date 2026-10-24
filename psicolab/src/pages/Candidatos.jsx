@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react'
-import { TIPOS } from '../data/solicitudes'
+import { TIPOS, COLUMNAS } from '../data/solicitudes'
 import { obtenerSolicitudes, actualizarSolicitud } from '../lib/api'
+
+const DESCARTADO = 'Descartado'
+const OPCIONES_ETAPA = [...COLUMNAS, DESCARTADO]
 
 const ESTADOS = ['Activos', 'Descartados', 'Todos']
 const TIPO_FILTROS = ['Todos', TIPOS.EXTERNO, TIPOS.INTERNO]
@@ -37,12 +40,18 @@ function Candidatos() {
       )
     })
 
-  async function restaurar(id) {
+  async function cambiarEtapa(id, valor) {
+    const cambios =
+      valor === DESCARTADO
+        ? { descartada: true }
+        : { etapa: valor, descartada: false }
+
     try {
-      const actualizada = await actualizarSolicitud(id, { descartada: false })
+      const actualizada = await actualizarSolicitud(id, cambios)
       setSolicitudes((previas) =>
         previas.map((s) => (s.id === actualizada.id ? actualizada : s)),
       )
+      setError(null)
     } catch (err) {
       setError(err.message)
     }
@@ -122,7 +131,6 @@ function Candidatos() {
                 <th>Cargo</th>
                 <th>Tipo</th>
                 <th>Etapa</th>
-                <th></th>
               </tr>
             </thead>
             <tbody>
@@ -142,17 +150,18 @@ function Candidatos() {
                       {s.candidato?.tipo}
                     </span>
                   </td>
-                  <td>{s.descartada ? 'Descartado' : s.etapa}</td>
-                  <td className="text-end">
-                    {s.descartada && (
-                      <button
-                        type="button"
-                        className="btn-restaurar"
-                        onClick={() => restaurar(s.id)}
-                      >
-                        Restaurar
-                      </button>
-                    )}
+                  <td>
+                    <select
+                      className="select-etapa"
+                      value={s.descartada ? DESCARTADO : s.etapa}
+                      onChange={(e) => cambiarEtapa(s.id, e.target.value)}
+                    >
+                      {OPCIONES_ETAPA.map((opcion) => (
+                        <option key={opcion} value={opcion}>
+                          {opcion}
+                        </option>
+                      ))}
+                    </select>
                   </td>
                 </tr>
               ))}

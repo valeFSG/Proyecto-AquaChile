@@ -11,6 +11,8 @@ const ETAPAS = {
   AGENDADA: 'Entrevista agendada',
   REALIZADA: 'Entrevista realizada',
   ENVIADA: 'Informe enviado',
+  JEFATURA: 'Entrevista con jefe de área',
+  CONTRATACION: 'Contratación',
 }
 
 let candidatos = [

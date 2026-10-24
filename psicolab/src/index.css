@@ -10,6 +10,7 @@
   --lima: #a3e635;
   --ambar: #fbbf24;
   --rosa: #fb7185;
+  --esmeralda: #2dd4bf;
 }
 
 * { box-sizing: border-box; }
@@ -347,4 +348,23 @@ body {
 @media (max-width: 767px) {
   .tabla-envoltorio { overflow-x: auto; }
   .tabla { min-width: 36rem; }
+}
+
+.select-etapa {
+  background: var(--panel-alto);
+  border: 1px solid var(--linea);
+  border-radius: 7px;
+  padding: .3rem .5rem;
+  color: var(--texto);
+  font: inherit;
+  font-size: .82rem;
+  cursor: pointer;
+  transition: border-color .2s ease-in-out;
+}
+
+.select-etapa:hover { border-color: var(--texto-sec); }
+
+.select-etapa:focus {
+  outline: none;
+  border-color: var(--cian);
 }

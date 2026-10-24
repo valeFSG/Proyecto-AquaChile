@@ -9,8 +9,13 @@ const COLOR_COLUMNA = {
   [ETAPAS.RECIBIDA]: 'cian',
   [ETAPAS.AGENDADA]: 'ambar',
   [ETAPAS.REALIZADA]: 'violeta',
-  [ETAPAS.ENVIADA]: 'lima',
+  [ETAPAS.ENVIADA]: 'esmeralda',
+  [ETAPAS.JEFATURA]: 'rosa',
+  [ETAPAS.CONTRATACION]: 'lima',
 }
+
+const ORDEN = Object.values(ETAPAS)
+const posicion = (etapa) => ORDEN.indexOf(etapa)
 
 function areaConMasDemanda(solicitudes) {
   if (solicitudes.length === 0) return { nombre: '—', total: 0 }
@@ -39,7 +44,9 @@ function Dashboard() {
 
   const activas = solicitudes.filter((s) => !s.descartada)
   const internos = activas.filter((s) => s.candidato?.tipo === TIPOS.INTERNO)
-  const enviados = activas.filter((s) => s.etapa === ETAPAS.ENVIADA)
+  const enviados = activas.filter(
+  (s) => posicion(s.etapa) >= posicion(ETAPAS.ENVIADA),
+)
   const area = areaConMasDemanda(activas)
 
   const porcentajeInternos =
@@ -136,7 +143,7 @@ function Dashboard() {
       ) : (
         <div className="row g-3">
           {Object.values(ETAPAS).map((etapa) => (
-            <div key={etapa} className="col-12 col-md-6 col-xl-3">
+              <div key={etapa} className="col-12 col-md-6 col-xl-4">
               <ColumnaKanban
                 nombre={etapa}
                 color={COLOR_COLUMNA[etapa]}
