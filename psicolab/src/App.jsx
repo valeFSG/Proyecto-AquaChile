@@ -1,21 +1,18 @@
 import { Routes, Route } from 'react-router-dom'
-import BarraLateral from './components/BarraLateral'
+import LayoutPrincipal from './layouts/LayoutPrincipal'
 import Dashboard from './pages/Dashboard'
-import Solicitar from './pages/Solicitar'
 import Candidatos from './pages/Candidatos'
+import Solicitar from './pages/Solicitar'
 
 function App() {
   return (
-    <div className="layout">
-      <BarraLateral />
-      <main className="contenido">
-        <Routes>
-          <Route path="/" element={<Dashboard />} />
-          <Route path="/candidatos" element={<Candidatos />} />
-          <Route path="/solicitar" element={<Solicitar />} />
-        </Routes>
-      </main>
-    </div>
+    <Routes>
+      <Route element={<LayoutPrincipal />}>
+        <Route path="/" element={<Dashboard />} />
+        <Route path="/candidatos" element={<Candidatos />} />
+        <Route path="/solicitar" element={<Solicitar />} />
+      </Route>
+    </Routes>
   )
 }
 
