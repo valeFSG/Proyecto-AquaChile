@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { ETAPAS, TIPOS } from '../data/solicitudes'
-import { obtenerSolicitudes, actualizarSolicitud } from '../lib/api'
+import {obtenerSolicitudes,actualizarSolicitud,actualizarCandidato,} from '../lib/api'
 import MetricaResumen from '../components/MetricaResumen'
 import ColumnaKanban from '../components/ColumnaKanban'
 import DetalleSolicitud from '../components/DetalleSolicitud'
@@ -84,6 +84,15 @@ function Dashboard() {
     setSeleccionada(actualizada)
   }
 
+    async function guardarDatos(datosCandidato, datosSolicitud) {
+    if (seleccionada.candidato) {
+      await actualizarCandidato(seleccionada.candidato.id, datosCandidato)
+    }
+    const actualizada = await actualizarSolicitud(seleccionada.id, datosSolicitud)
+    reemplazar(actualizada)
+    setSeleccionada(actualizada)
+  }
+
   if (seleccionada) {
     return (
       <DetalleSolicitud
@@ -92,6 +101,7 @@ function Dashboard() {
         onAvanzar={avanzar}
         onDescartar={descartar}
         onGuardarEvaluacion={guardarEvaluacion}
+        onGuardarDatos={guardarDatos}
       />
     )
   }

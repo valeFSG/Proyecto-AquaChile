@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { planificarCarpeta } from '../lib/carpeta'
 import { ETAPAS, TIPOS, CATEGORIAS } from '../data/solicitudes'
+import { FAMILIAS } from '../data/catalogo'
 
 const SIGUIENTE_ETAPA = {
   [ETAPAS.RECIBIDA]: ETAPAS.AGENDADA,
@@ -16,10 +17,14 @@ function DetalleSolicitud({
   onAvanzar,
   onDescartar,
   onGuardarEvaluacion,
+  onGuardarDatos,
 }) {
   const [guardando, setGuardando] = useState(false)
   const [errorEval, setErrorEval] = useState(null)
   const [mensaje, setMensaje] = useState(null)
+  const [editando, setEditando] = useState(false)
+  const [errorDatos, setErrorDatos] = useState(null)
+  const [datos, setDatos] = useState(null)
   const [evaluacion, setEvaluacion] = useState({
     fechaEvaluacion: solicitud.fechaEvaluacion ?? '',
     categoria: solicitud.categoria ?? '',
@@ -37,6 +42,11 @@ function DetalleSolicitud({
     setEvaluacion((previos) => ({ ...previos, [name]: value }))
   }
 
+  function cambiarDato(evento) {
+    const { name, value } = evento.target
+    setDatos((previos) => ({ ...previos, [name]: value }))
+  }
+
   async function accion(fn) {
     setGuardando(true)
     try {
@@ -46,7 +56,69 @@ function DetalleSolicitud({
     }
   }
 
-    async function guardarEvaluacion() {
+  function abrirEdicion() {
+    setDatos({
+      nombre: candidato?.nombre ?? '',
+      correo: candidato?.correo ?? '',
+      telefono: candidato?.telefono ?? '',
+      areaActual: candidato?.areaActual ?? '',
+      cargoActual: candidato?.cargoActual ?? '',
+      antiguedadAnios: candidato?.antiguedadAnios ?? '',
+      cargo: solicitud.cargo,
+      familiaCargo: solicitud.familiaCargo,
+      analista: solicitud.analista,
+    })
+    setErrorDatos(null)
+    setMensaje(null)
+    setEditando(true)
+  }
+
+  async function guardarDatos() {
+    if (!datos.nombre.trim()) {
+      setErrorDatos('El nombre es obligatorio.')
+      return
+    }
+    if (!datos.correo.includes('@')) {
+      setErrorDatos('El correo no es válido.')
+      return
+    }
+    if (!datos.cargo.trim()) {
+      setErrorDatos('El cargo es obligatorio.')
+      return
+    }
+
+    const datosCandidato = {
+      nombre: datos.nombre,
+      correo: datos.correo,
+      telefono: datos.telefono,
+    }
+
+    if (esInterno) {
+      datosCandidato.areaActual = datos.areaActual
+      datosCandidato.cargoActual = datos.cargoActual
+      datosCandidato.antiguedadAnios = Number(datos.antiguedadAnios) || 0
+    }
+
+    const datosSolicitud = {
+      cargo: datos.cargo,
+      familiaCargo: datos.familiaCargo,
+      analista: datos.analista,
+    }
+
+    setErrorDatos(null)
+    setGuardando(true)
+    try {
+      await onGuardarDatos(datosCandidato, datosSolicitud)
+      setEditando(false)
+      setMensaje('Datos actualizados.')
+    } catch (err) {
+      setErrorDatos(err.message)
+    } finally {
+      setGuardando(false)
+    }
+  }
+
+  async function guardarEvaluacion() {
     setMensaje(null)
 
     if (!evaluacion.categoria) {
@@ -89,54 +161,170 @@ function DetalleSolicitud({
         </span>
       </div>
 
-      <div className="bloque mb-3">
-        <h2 className="bloque-titulo">Datos del candidato</h2>
-        <div className="row g-3">
-          <div className="col-12 col-md-6">
-            <div className="dato-label">Correo</div>
-            <div className="dato-valor">{candidato?.correo || '—'}</div>
+      {editando ? (
+        <div className="bloque mb-3">
+          <h2 className="bloque-titulo">Editar datos</h2>
+
+          <div className="row g-3">
+            <div className="col-12 col-md-7">
+              <label className="campo-label" htmlFor="nombre">Nombre completo</label>
+              <input
+                id="nombre" name="nombre" className="campo-input"
+                value={datos.nombre} onChange={cambiarDato}
+              />
+            </div>
+
+            <div className="col-12 col-md-5">
+              <label className="campo-label" htmlFor="correo">Correo</label>
+              <input
+                id="correo" name="correo" type="email" className="campo-input"
+                value={datos.correo} onChange={cambiarDato}
+              />
+            </div>
+
+            <div className="col-12 col-md-4">
+              <label className="campo-label" htmlFor="telefono">Teléfono</label>
+              <input
+                id="telefono" name="telefono" className="campo-input"
+                value={datos.telefono} onChange={cambiarDato}
+              />
+            </div>
+
+            {esInterno && (
+              <>
+                <div className="col-12 col-md-4">
+                  <label className="campo-label" htmlFor="areaActual">Área actual</label>
+                  <input
+                    id="areaActual" name="areaActual" className="campo-input"
+                    value={datos.areaActual} onChange={cambiarDato}
+                  />
+                </div>
+                <div className="col-12 col-md-4">
+                  <label className="campo-label" htmlFor="cargoActual">Cargo actual</label>
+                  <input
+                    id="cargoActual" name="cargoActual" className="campo-input"
+                    value={datos.cargoActual} onChange={cambiarDato}
+                  />
+                </div>
+                <div className="col-12 col-md-4">
+                  <label className="campo-label" htmlFor="antiguedadAnios">Antigüedad</label>
+                  <input
+                    id="antiguedadAnios" name="antiguedadAnios" type="number" min="0"
+                    className="campo-input"
+                    value={datos.antiguedadAnios} onChange={cambiarDato}
+                  />
+                </div>
+              </>
+            )}
+
+            <div className="col-12 col-md-4">
+              <label className="campo-label" htmlFor="familiaCargo">Familia de cargo</label>
+              <select
+                id="familiaCargo" name="familiaCargo" className="campo-input"
+                value={datos.familiaCargo} onChange={cambiarDato}
+              >
+                {FAMILIAS.map((familia) => (
+                  <option key={familia.id} value={familia.nombre}>{familia.nombre}</option>
+                ))}
+              </select>
+            </div>
+
+            <div className="col-12 col-md-4">
+              <label className="campo-label" htmlFor="cargo">Cargo al que postula</label>
+              <input
+                id="cargo" name="cargo" className="campo-input"
+                value={datos.cargo} onChange={cambiarDato}
+              />
+            </div>
+
+            <div className="col-12 col-md-4">
+              <label className="campo-label" htmlFor="analista">Analista</label>
+              <input
+                id="analista" name="analista" className="campo-input"
+                value={datos.analista} onChange={cambiarDato}
+              />
+            </div>
           </div>
-          <div className="col-12 col-md-6">
-            <div className="dato-label">Teléfono</div>
-            <div className="dato-valor">{candidato?.telefono || '—'}</div>
+
+          {errorDatos && <span className="campo-error d-block mt-2">{errorDatos}</span>}
+
+          <div className="d-flex justify-content-end gap-2 mt-3">
+            <button
+              type="button"
+              className="btn-cancelar"
+              disabled={guardando}
+              onClick={() => setEditando(false)}
+            >
+              Cancelar
+            </button>
+            <button
+              type="button"
+              className="btn btn-nuevo"
+              disabled={guardando}
+              onClick={guardarDatos}
+            >
+              Guardar cambios
+            </button>
           </div>
         </div>
+      ) : (
+        <>
+          <div className="bloque mb-3">
+            <div className="d-flex justify-content-between align-items-start mb-3">
+              <h2 className="bloque-titulo mb-0">Datos del candidato</h2>
+              <button type="button" className="btn-restaurar" onClick={abrirEdicion}>
+                Editar
+              </button>
+            </div>
 
-        {esInterno && (
-          <div className="row g-3 mt-1 pt-3" style={{ borderTop: '1px solid var(--linea)' }}>
-            <div className="col-6 col-md-4">
-              <div className="dato-label">Área actual</div>
-              <div className="dato-valor">{candidato.areaActual}</div>
+            <div className="row g-3">
+              <div className="col-12 col-md-6">
+                <div className="dato-label">Correo</div>
+                <div className="dato-valor">{candidato?.correo || '—'}</div>
+              </div>
+              <div className="col-12 col-md-6">
+                <div className="dato-label">Teléfono</div>
+                <div className="dato-valor">{candidato?.telefono || '—'}</div>
+              </div>
             </div>
-            <div className="col-6 col-md-5">
-              <div className="dato-label">Cargo actual</div>
-              <div className="dato-valor">{candidato.cargoActual}</div>
-            </div>
-            <div className="col-6 col-md-3">
-              <div className="dato-label">Antigüedad</div>
-              <div className="dato-valor">{candidato.antiguedadAnios} años</div>
-            </div>
-          </div>
-        )}
-      </div>
 
-      <div className="bloque mb-3">
-        <h2 className="bloque-titulo">Datos de la solicitud</h2>
-        <div className="row g-3">
-          <div className="col-6 col-md-4">
-            <div className="dato-label">Solicitó</div>
-            <div className="dato-valor">{solicitud.analista}</div>
+            {esInterno && (
+              <div className="row g-3 mt-1 pt-3" style={{ borderTop: '1px solid var(--linea)' }}>
+                <div className="col-6 col-md-4">
+                  <div className="dato-label">Área actual</div>
+                  <div className="dato-valor">{candidato.areaActual}</div>
+                </div>
+                <div className="col-6 col-md-5">
+                  <div className="dato-label">Cargo actual</div>
+                  <div className="dato-valor">{candidato.cargoActual}</div>
+                </div>
+                <div className="col-6 col-md-3">
+                  <div className="dato-label">Antigüedad</div>
+                  <div className="dato-valor">{candidato.antiguedadAnios} años</div>
+                </div>
+              </div>
+            )}
           </div>
-          <div className="col-6 col-md-4">
-            <div className="dato-label">Fecha de solicitud</div>
-            <div className="dato-valor">{solicitud.fechaSolicitud}</div>
+
+          <div className="bloque mb-3">
+            <h2 className="bloque-titulo">Datos de la solicitud</h2>
+            <div className="row g-3">
+              <div className="col-6 col-md-4">
+                <div className="dato-label">Solicitó</div>
+                <div className="dato-valor">{solicitud.analista}</div>
+              </div>
+              <div className="col-6 col-md-4">
+                <div className="dato-label">Fecha de solicitud</div>
+                <div className="dato-valor">{solicitud.fechaSolicitud}</div>
+              </div>
+              <div className="col-6 col-md-4">
+                <div className="dato-label">Etapa</div>
+                <div className="dato-valor">{solicitud.etapa}</div>
+              </div>
+            </div>
           </div>
-          <div className="col-6 col-md-4">
-            <div className="dato-label">Etapa</div>
-            <div className="dato-valor">{solicitud.etapa}</div>
-          </div>
-        </div>
-      </div>
+        </>
+      )}
 
       <div className="bloque mb-3">
         <h2 className="bloque-titulo">Evaluación psicolaboral</h2>
@@ -191,6 +379,7 @@ function DetalleSolicitud({
         </div>
 
         {errorEval && <span className="campo-error d-block mt-2">{errorEval}</span>}
+        {mensaje && <span className="campo-ayuda d-block mt-2">{mensaje}</span>}
 
         <div className="d-flex justify-content-end mt-3">
           <button
