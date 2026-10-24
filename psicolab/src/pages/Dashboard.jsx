@@ -78,6 +78,12 @@ function Dashboard() {
     }
   }
 
+  async function guardarEvaluacion(id, datos) {
+    const actualizada = await actualizarSolicitud(id, datos)
+    reemplazar(actualizada)
+    setSeleccionada(actualizada)
+  }
+
   if (seleccionada) {
     return (
       <DetalleSolicitud
@@ -85,6 +91,7 @@ function Dashboard() {
         onCerrar={() => setSeleccionada(null)}
         onAvanzar={avanzar}
         onDescartar={descartar}
+        onGuardarEvaluacion={guardarEvaluacion}
       />
     )
   }

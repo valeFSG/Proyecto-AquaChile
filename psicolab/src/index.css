@@ -368,3 +368,13 @@ body {
   outline: none;
   border-color: var(--cian);
 }
+
+.campo-area {
+  min-height: 7rem;
+  resize: vertical;
+  line-height: 1.6;
+}
+
+.campo-input[type="date"] {
+  color-scheme: dark;
+}

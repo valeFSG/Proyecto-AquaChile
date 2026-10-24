@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { planificarCarpeta } from '../lib/carpeta'
-import { ETAPAS, TIPOS } from '../data/solicitudes'
+import { ETAPAS, TIPOS, CATEGORIAS } from '../data/solicitudes'
 
 const SIGUIENTE_ETAPA = {
   [ETAPAS.RECIBIDA]: ETAPAS.AGENDADA,
@@ -10,18 +10,61 @@ const SIGUIENTE_ETAPA = {
   [ETAPAS.JEFATURA]: ETAPAS.CONTRATACION,
 }
 
-function DetalleSolicitud({ solicitud, onCerrar, onAvanzar, onDescartar }) {
+function DetalleSolicitud({
+  solicitud,
+  onCerrar,
+  onAvanzar,
+  onDescartar,
+  onGuardarEvaluacion,
+}) {
   const [guardando, setGuardando] = useState(false)
+  const [errorEval, setErrorEval] = useState(null)
+  const [mensaje, setMensaje] = useState(null)
+  const [evaluacion, setEvaluacion] = useState({
+    fechaEvaluacion: solicitud.fechaEvaluacion ?? '',
+    categoria: solicitud.categoria ?? '',
+    observaciones: solicitud.observaciones ?? '',
+  })
+
   const { carpeta, archivos } = planificarCarpeta(solicitud)
 
   const candidato = solicitud.candidato
   const esInterno = candidato?.tipo === TIPOS.INTERNO
   const siguiente = SIGUIENTE_ETAPA[solicitud.etapa]
 
+  function cambiarEval(evento) {
+    const { name, value } = evento.target
+    setEvaluacion((previos) => ({ ...previos, [name]: value }))
+  }
+
   async function accion(fn) {
     setGuardando(true)
     try {
       await fn()
+    } finally {
+      setGuardando(false)
+    }
+  }
+
+    async function guardarEvaluacion() {
+    setMensaje(null)
+
+    if (!evaluacion.categoria) {
+      setErrorEval('Elige una categoría.')
+      return
+    }
+    if (!evaluacion.fechaEvaluacion) {
+      setErrorEval('Indica la fecha de la evaluación.')
+      return
+    }
+
+    setErrorEval(null)
+    setGuardando(true)
+    try {
+      await onGuardarEvaluacion(solicitud.id, evaluacion)
+      setMensaje('Evaluación guardada.')
+    } catch (err) {
+      setErrorEval(err.message)
     } finally {
       setGuardando(false)
     }
@@ -95,26 +138,71 @@ function DetalleSolicitud({ solicitud, onCerrar, onAvanzar, onDescartar }) {
         </div>
       </div>
 
-      {solicitud.categoria && (
-        <div className="bloque mb-3">
-          <h2 className="bloque-titulo">Resultado de la evaluación</h2>
-          <div className="row g-3">
-            <div className="col-12 col-md-5">
-              <div className="dato-label">Categoría</div>
-              <div className="dato-valor">{solicitud.categoria}</div>
-            </div>
-            {solicitud.fechaEvaluacion && (
-              <div className="col-6 col-md-4">
-                <div className="dato-label">Fecha de evaluación</div>
-                <div className="dato-valor">{solicitud.fechaEvaluacion}</div>
-              </div>
-            )}
+      <div className="bloque mb-3">
+        <h2 className="bloque-titulo">Evaluación psicolaboral</h2>
+
+        <div className="row g-3">
+          <div className="col-12 col-md-4">
+            <label className="campo-label" htmlFor="fechaEvaluacion">
+              Fecha de evaluación
+            </label>
+            <input
+              id="fechaEvaluacion"
+              name="fechaEvaluacion"
+              type="date"
+              className="campo-input"
+              value={evaluacion.fechaEvaluacion}
+              onChange={cambiarEval}
+            />
           </div>
-          {solicitud.observaciones && (
-            <p className="dato-valor mt-3 mb-0">{solicitud.observaciones}</p>
-          )}
+
+          <div className="col-12 col-md-8">
+            <label className="campo-label" htmlFor="categoria">
+              Categoría del evaluado
+            </label>
+            <select
+              id="categoria"
+              name="categoria"
+              className="campo-input"
+              value={evaluacion.categoria}
+              onChange={cambiarEval}
+            >
+              <option value="">Sin evaluar</option>
+              {Object.values(CATEGORIAS).map((opcion) => (
+                <option key={opcion} value={opcion}>{opcion}</option>
+              ))}
+            </select>
+          </div>
+
+          <div className="col-12">
+            <label className="campo-label" htmlFor="observaciones">
+              Observaciones
+            </label>
+            <textarea
+              id="observaciones"
+              name="observaciones"
+              className="campo-input campo-area"
+              rows="4"
+              value={evaluacion.observaciones}
+              onChange={cambiarEval}
+              placeholder="Fortalezas, oportunidades de desarrollo y conclusión general."
+            />
+          </div>
         </div>
-      )}
+
+        {errorEval && <span className="campo-error d-block mt-2">{errorEval}</span>}
+
+        <div className="d-flex justify-content-end mt-3">
+          <button
+            type="button"
+            className="btn btn-nuevo"
+            disabled={guardando}
+            onClick={guardarEvaluacion}
+          >
+            Guardar evaluación
+          </button>
+        </div>
+      </div>
 
       <div className="bloque mb-4">
         <h2 className="bloque-titulo">Carpeta de trabajo</h2>
