@@ -2,3 +2,5 @@ node_modules/
 dist/
 .env
 *.db
+credenciales-drive.json
+aquachile-psicolaboral-*.json
