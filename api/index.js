@@ -1,5 +1,6 @@
 import express from 'express'
 import cors from 'cors'
+import { carpetaDeCandidato, driveActivo, enlaceCarpeta } from './drive.js'
 
 const app = express()
 
@@ -143,7 +144,7 @@ app.get('/api/solicitudes', (req, res) => {
   res.json(solicitudes.map(conCandidato))
 })
 
-app.post('/api/solicitudes', (req, res) => {
+app.post('/api/solicitudes', async (req, res) => {
   const {
     tipo, nombre, correo, telefono, familiaCargo, cargo, analista, nombreCv,
     areaActual, cargoActual, antiguedadAnios,
@@ -198,6 +199,17 @@ app.post('/api/solicitudes', (req, res) => {
     fechaSolicitud: new Date().toISOString().slice(0, 10),
   }
 
+  // La carpeta de Drive es opcional: si falla, la solicitud se crea igual.
+  if (driveActivo()) {
+    try {
+      const carpetaId = await carpetaDeCandidato(candidato.nombre)
+      nueva.carpetaId = carpetaId
+      nueva.carpetaUrl = enlaceCarpeta(carpetaId)
+    } catch (error) {
+      console.error('Drive no respondió:', error.message)
+    }
+  }
+
   solicitudes = [nueva, ...solicitudes]
   res.status(201).json(conCandidato(nueva))
 })
@@ -232,4 +244,5 @@ app.patch('/api/solicitudes/:id', (req, res) => {
 
 app.listen(3000, () => {
   console.log('API escuchando en http://localhost:3000')
+  console.log('Drive:', driveActivo() ? 'conectado' : 'apagado')
 })
