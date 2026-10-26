@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest'
 import { normalizarNombre, planificarCarpeta } from './carpeta'
 
 const solicitudBase = {
-  candidato: 'María Fernanda Soto',
+  candidato: { nombre: 'María Fernanda Soto' },
   familiaCargo: 'Operaciones',
   fechaSolicitud: '2026-09-01',
   nombreCv: 'cv-maria.pdf',

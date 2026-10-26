@@ -2,9 +2,10 @@ import { describe, it, expect, vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import DetalleSolicitud from './DetalleSolicitud'
-import { solicitudesIniciales } from '../data/solicitudes'
+import { solicitudesIniciales, ETAPAS } from '../data/solicitudes'
+import { candidatosIniciales } from '../data/candidatos'
 
-const solicitud = solicitudesIniciales[0]
+const solicitud = { ...solicitudesIniciales[0], candidato: candidatosIniciales[0] }
 
 const renderizar = (props = {}) =>
   render(
@@ -13,7 +14,8 @@ const renderizar = (props = {}) =>
       onCerrar={vi.fn()}
       onAvanzar={vi.fn()}
       onDescartar={vi.fn()}
-      onCambiarPaso={vi.fn()}
+      onGuardarEvaluacion={vi.fn()}
+      onGuardarDatos={vi.fn()}
       {...props}
     />,
   )
@@ -30,8 +32,8 @@ describe('DetalleSolicitud', () => {
   it('llama a onAvanzar con la siguiente etapa', async () => {
     const onAvanzar = vi.fn()
     renderizar({ onAvanzar })
-    await userEvent.click(screen.getByRole('button', { name: 'Avanzar a Evaluación' }))
-    expect(onAvanzar).toHaveBeenCalledWith('1', 'Evaluación')
+    await userEvent.click(screen.getByRole('button', { name: `Avanzar a ${ETAPAS.AGENDADA}` }))
+    expect(onAvanzar).toHaveBeenCalledWith('1', ETAPAS.AGENDADA)
   })
 
   it('llama a onDescartar con el id del candidato', async () => {

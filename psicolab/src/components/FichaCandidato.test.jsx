@@ -3,8 +3,9 @@ import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import FichaCandidato from './FichaCandidato'
 import { solicitudesIniciales } from '../data/solicitudes'
+import { candidatosIniciales } from '../data/candidatos'
 
-const externo = solicitudesIniciales[0]
+const externo = { ...solicitudesIniciales[0], candidato: candidatosIniciales[0] }
 
 describe('FichaCandidato', () => {
   it('muestra el candidato, el cargo y el tipo', () => {

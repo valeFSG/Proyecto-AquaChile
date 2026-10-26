@@ -10,7 +10,7 @@ describe('FormularioSolicitud', () => {
     render(<FormularioSolicitud onCrear={vi.fn()} onCancelar={vi.fn()} />)
     await enviar()
     expect(screen.getByText('Escribe el nombre.')).toBeInTheDocument()
-    expect(screen.getByText('Escribe el RUT.')).toBeInTheDocument()
+    expect(screen.getByText('Escribe el correo.')).toBeInTheDocument()
     expect(screen.getByText('Elige una familia de cargo.')).toBeInTheDocument()
     expect(screen.getByText('Escribe el cargo al que postula.')).toBeInTheDocument()
     expect(screen.getByText('Indica quién solicita.')).toBeInTheDocument()
@@ -31,19 +31,19 @@ describe('FormularioSolicitud', () => {
     render(<FormularioSolicitud onCrear={onCrear} onCancelar={vi.fn()} />)
 
     await usuario.type(screen.getByLabelText('Nombre completo'), 'María Fernanda Soto')
-    await usuario.type(screen.getByLabelText('RUT'), '18.452.339-1')
+    await usuario.type(screen.getByLabelText('Correo electrónico'), 'maria.soto@correo.cl')
     await usuario.selectOptions(screen.getByLabelText('Familia de cargo'), 'Operaciones')
     await usuario.type(screen.getByLabelText('Cargo al que postula'), 'Jefe de Turno Planta')
     await usuario.type(screen.getByLabelText('Analista que solicita'), 'Camila Rojas')
-    await usuario.upload(screen.getByLabelText('Curriculum vitae'), cv)
+    await usuario.upload(screen.getByLabelText(/Curriculum vitae/), cv)
     await enviar()
 
     expect(onCrear).toHaveBeenCalledTimes(1)
     expect(onCrear).toHaveBeenCalledWith(
       expect.objectContaining({
         tipo: 'Externo',
-        candidato: 'María Fernanda Soto',
-        rut: '18.452.339-1',
+        nombre: 'María Fernanda Soto',
+        correo: 'maria.soto@correo.cl',
         familiaCargo: 'Operaciones',
         cargo: 'Jefe de Turno Planta',
         analista: 'Camila Rojas',
