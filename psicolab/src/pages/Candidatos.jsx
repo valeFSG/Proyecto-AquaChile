@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react'
 import { TIPOS, COLUMNAS } from '../data/solicitudes'
 import { obtenerSolicitudes, actualizarSolicitud } from '../lib/api'
+import { useSesion } from '../context/sesion'
+import { ACCIONES } from '../lib/sesion'
 
 const DESCARTADO = 'Descartado'
 const OPCIONES_ETAPA = [...COLUMNAS, DESCARTADO]
@@ -9,6 +11,8 @@ const ESTADOS = ['Activos', 'Descartados', 'Todos']
 const TIPO_FILTROS = ['Todos', TIPOS.EXTERNO, TIPOS.INTERNO]
 
 function Candidatos() {
+  const { puede } = useSesion()
+  const puedeMover = puede(ACCIONES.MOVER_ETAPA)
   const [solicitudes, setSolicitudes] = useState([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState(null)
@@ -154,6 +158,7 @@ function Candidatos() {
                     <select
                       className="select-etapa"
                       value={s.descartada ? DESCARTADO : s.etapa}
+                      disabled={!puedeMover}
                       onChange={(e) => cambiarEtapa(s.id, e.target.value)}
                     >
                       {OPCIONES_ETAPA.map((opcion) => (

@@ -378,3 +378,24 @@ body {
 .campo-input[type="date"] {
   color-scheme: dark;
 }
+
+/* Login */
+.login {
+  min-height: 100vh; display: flex; align-items: center; justify-content: center;
+  padding: 1.5rem; background: radial-gradient(circle at top, var(--panel-alto), var(--fondo) 60%);
+}
+.login-caja {
+  width: 100%; max-width: 24rem; background: var(--panel);
+  border: 1px solid var(--linea); border-radius: 16px; padding: 2rem;
+}
+.login-demo { margin-top: 1.75rem; padding-top: 1.25rem; border-top: 1px solid var(--linea); }
+.usuario-actual {
+  margin-top: auto; padding: .9rem .5rem 0; border-top: 1px solid var(--linea);
+  font-size: .8rem;
+}
+.usuario-actual small { display: block; color: var(--texto-sec); font-size: .72rem; }
+.btn-salir {
+  margin-top: .6rem; background: none; border: 1px solid var(--linea); border-radius: 8px;
+  color: var(--texto-sec); font-size: .75rem; padding: .3rem .7rem; transition: all .2s ease-in-out;
+}
+.btn-salir:hover { border-color: var(--rosa); color: var(--rosa); }

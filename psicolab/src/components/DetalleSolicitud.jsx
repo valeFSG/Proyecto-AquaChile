@@ -18,6 +18,9 @@ function DetalleSolicitud({
   onDescartar,
   onGuardarEvaluacion,
   onGuardarDatos,
+  puedeEditar = true,
+  puedeMover = true,
+  puedeEvaluar = true,
 }) {
   const [guardando, setGuardando] = useState(false)
   const [errorEval, setErrorEval] = useState(null)
@@ -272,9 +275,11 @@ function DetalleSolicitud({
           <div className="bloque mb-3">
             <div className="d-flex justify-content-between align-items-start mb-3">
               <h2 className="bloque-titulo mb-0">Datos del candidato</h2>
-              <button type="button" className="btn-restaurar" onClick={abrirEdicion}>
-                Editar
-              </button>
+              {puedeEditar && (
+                <button type="button" className="btn-restaurar" onClick={abrirEdicion}>
+                  Editar
+                </button>
+              )}
             </div>
 
             <div className="row g-3">
@@ -329,7 +334,7 @@ function DetalleSolicitud({
       <div className="bloque mb-3">
         <h2 className="bloque-titulo">Evaluación psicolaboral</h2>
 
-        <div className="row g-3">
+        <fieldset disabled={!puedeEvaluar} className="row g-3">
           <div className="col-12 col-md-4">
             <label className="campo-label" htmlFor="fechaEvaluacion">
               Fecha de evaluación
@@ -376,21 +381,23 @@ function DetalleSolicitud({
               placeholder="Fortalezas, oportunidades de desarrollo y conclusión general."
             />
           </div>
-        </div>
+        </fieldset>
 
         {errorEval && <span className="campo-error d-block mt-2">{errorEval}</span>}
         {mensaje && <span className="campo-ayuda d-block mt-2">{mensaje}</span>}
 
-        <div className="d-flex justify-content-end mt-3">
-          <button
-            type="button"
-            className="btn btn-nuevo"
-            disabled={guardando}
-            onClick={guardarEvaluacion}
-          >
-            Guardar evaluación
-          </button>
-        </div>
+        {puedeEvaluar && (
+          <div className="d-flex justify-content-end mt-3">
+            <button
+              type="button"
+              className="btn btn-nuevo"
+              disabled={guardando}
+              onClick={guardarEvaluacion}
+            >
+              Guardar evaluación
+            </button>
+          </div>
+        )}
       </div>
 
       <div className="bloque mb-4">
@@ -408,26 +415,28 @@ function DetalleSolicitud({
         </div>
       </div>
 
-      <div className="d-flex gap-2 flex-wrap">
-        {siguiente && (
+      {puedeMover && (
+        <div className="d-flex gap-2 flex-wrap">
+          {siguiente && (
+            <button
+              type="button"
+              className="btn btn-nuevo"
+              disabled={guardando}
+              onClick={() => accion(() => onAvanzar(solicitud.id, siguiente))}
+            >
+              Avanzar a {siguiente}
+            </button>
+          )}
           <button
             type="button"
-            className="btn btn-nuevo"
+            className="btn-descartar"
             disabled={guardando}
-            onClick={() => accion(() => onAvanzar(solicitud.id, siguiente))}
+            onClick={() => accion(() => onDescartar(solicitud.id))}
           >
-            Avanzar a {siguiente}
+            Descartar candidato
           </button>
-        )}
-        <button
-          type="button"
-          className="btn-descartar"
-          disabled={guardando}
-          onClick={() => accion(() => onDescartar(solicitud.id))}
-        >
-          Descartar candidato
-        </button>
-      </div>
+        </div>
+      )}
     </div>
   )
 }

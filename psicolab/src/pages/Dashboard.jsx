@@ -4,6 +4,8 @@ import {obtenerSolicitudes,actualizarSolicitud,actualizarCandidato,} from '../li
 import MetricaResumen from '../components/MetricaResumen'
 import ColumnaKanban from '../components/ColumnaKanban'
 import DetalleSolicitud from '../components/DetalleSolicitud'
+import { useSesion } from '../context/sesion'
+import { ACCIONES } from '../lib/sesion'
 
 const COLOR_COLUMNA = {
   [ETAPAS.RECIBIDA]: 'cian',
@@ -30,6 +32,7 @@ function areaConMasDemanda(solicitudes) {
 }
 
 function Dashboard() {
+  const { puede } = useSesion()
   const [solicitudes, setSolicitudes] = useState([])
   const [cargando, setCargando] = useState(true)
   const [error, setError] = useState(null)
@@ -102,6 +105,9 @@ function Dashboard() {
         onDescartar={descartar}
         onGuardarEvaluacion={guardarEvaluacion}
         onGuardarDatos={guardarDatos}
+        puedeEditar={puede(ACCIONES.EDITAR_DATOS)}
+        puedeMover={puede(ACCIONES.MOVER_ETAPA)}
+        puedeEvaluar={puede(ACCIONES.REGISTRAR_EVALUACION)}
       />
     )
   }
