@@ -150,6 +150,32 @@ node probar-drive.js  # crea una carpeta y sube un archivo de prueba
 La especificación de requisitos, el alcance implementado y las funcionalidades
 pendientes están en [`docs/ERS.md`](docs/ERS.md).
 
+## Capturas
+
+### Inicio de sesión
+![Inicio de sesión](docs/capturas/login.png)
+
+### Dashboard
+![Dashboard](docs/capturas/dashboard.png)
+
+### Candidatos
+![Candidatos](docs/capturas/candidatos.png)
+
+### Nueva solicitud
+![Nueva solicitud](docs/capturas/solicitar.png)
+
+### Detalle de la solicitud
+![Detalle](docs/capturas/detalle.png)
+
+### Informes
+![Informes](docs/capturas/informes.png)
+
+### Carpeta generada en Google Drive
+![Carpeta en Drive](docs/capturas/drive.png)
+
+### Pruebas unitarias
+![Pruebas](docs/capturas/pruebas.png)
+
 ## Consideraciones
 
 - Todos los datos del proyecto son ficticios. No se utilizan nombres, RUT,
