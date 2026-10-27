@@ -19,9 +19,9 @@ describe('normalizarNombre', () => {
 })
 
 describe('planificarCarpeta', () => {
-  it('arma la ruta con el mes de la solicitud y el nombre normalizado', () => {
-    const { carpeta } = planificarCarpeta(solicitudBase)
-    expect(carpeta).toBe('/Evaluaciones/2026-09/maria-fernanda-soto')
+  it('usa el nombre del candidato como nombre de la carpeta', () => {
+    const { nombre } = planificarCarpeta(solicitudBase)
+    expect(nombre).toBe('María Fernanda Soto')
   })
 
   it('incluye el CV y las dos plantillas de la familia', () => {

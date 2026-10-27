@@ -21,12 +21,28 @@ const renderizar = (props = {}) =>
   )
 
 describe('DetalleSolicitud', () => {
-  it('muestra la ruta y los tres archivos de la carpeta', () => {
+  it('avisa cuando la solicitud todavía no tiene carpeta', () => {
     renderizar()
-    expect(screen.getByText('/Evaluaciones/2026-09/maria-fernanda-soto')).toBeInTheDocument()
+    expect(
+      screen.getByText('Sin carpeta. Se crea al registrar la solicitud.'),
+    ).toBeInTheDocument()
     expect(screen.getByText('cv-maria-soto.pdf')).toBeInTheDocument()
     expect(screen.getByText('informe-operaciones.xlsx')).toBeInTheDocument()
     expect(screen.getByText('pauta-operaciones.docx')).toBeInTheDocument()
+  })
+
+  it('muestra el enlace a Drive cuando la carpeta existe', () => {
+    renderizar({
+      solicitud: {
+        ...solicitud,
+        carpetaUrl: 'https://drive.google.com/drive/folders/abc123',
+      },
+    })
+    const enlace = screen.getByRole('link', { name: 'María Fernanda Soto' })
+    expect(enlace).toHaveAttribute(
+      'href',
+      'https://drive.google.com/drive/folders/abc123',
+    )
   })
 
   it('llama a onAvanzar con la siguiente etapa', async () => {

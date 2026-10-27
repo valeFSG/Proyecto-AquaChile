@@ -1,6 +1,7 @@
 import { FAMILIAS } from '../data/catalogo'
 
-// Convierte "María Fernanda Soto" en "maria-fernanda-soto"
+// Convierte "María Fernanda Soto" en "maria-fernanda-soto".
+// Sirve para nombrar archivos; las carpetas de Drive usan el nombre real.
 export function normalizarNombre(nombre) {
   return nombre
     .normalize('NFD')
@@ -11,13 +12,11 @@ export function normalizarNombre(nombre) {
     .replace(/^-|-$/g, '')
 }
 
-// Dada una solicitud con su candidato, devuelve la carpeta
-// y los archivos que el sistema debe dejar preparados.
+// Nombre de la carpeta en Drive y documentos que debe contener
+// según la familia del cargo.
 export function planificarCarpeta(solicitud) {
   const familia = FAMILIAS.find((f) => f.nombre === solicitud.familiaCargo)
-  const nombre = normalizarNombre(solicitud.candidato?.nombre ?? '')
-  const mes = solicitud.fechaSolicitud.slice(0, 7)
-  const carpeta = `/Evaluaciones/${mes}/${nombre}`
+  const nombre = solicitud.candidato?.nombre ?? 'Sin nombre'
 
   const archivos = [
     {
@@ -42,5 +41,5 @@ export function planificarCarpeta(solicitud) {
     )
   }
 
-  return { carpeta, archivos }
+  return { nombre, archivos }
 }

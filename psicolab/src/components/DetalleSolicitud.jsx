@@ -34,7 +34,7 @@ function DetalleSolicitud({
     observaciones: solicitud.observaciones ?? '',
   })
 
-  const { carpeta, archivos } = planificarCarpeta(solicitud)
+  const { nombre: nombreCarpeta, archivos } = planificarCarpeta(solicitud)
 
   const candidato = solicitud.candidato
   const esInterno = candidato?.tipo === TIPOS.INTERNO
@@ -400,9 +400,25 @@ function DetalleSolicitud({
         )}
       </div>
 
-      <div className="bloque mb-4">
-        <h2 className="bloque-titulo">Carpeta de trabajo</h2>
-        <p className="ruta">{carpeta}</p>
+            <div className="bloque mb-4">
+        <h2 className="bloque-titulo">Carpeta en Drive</h2>
+
+        {solicitud.carpetaUrl ? (
+          <p className="ruta">
+            <a
+              className="enlace-carpeta"
+              href={solicitud.carpetaUrl}
+              target="_blank"
+              rel="noreferrer"
+            >
+              {nombreCarpeta}
+            </a>
+          </p>
+        ) : (
+          <p className="ruta">Sin carpeta. Se crea al registrar la solicitud.</p>
+        )}
+
+        <p className="dato-label mb-2">Documentos que debe contener</p>
 
         <div className="archivos">
           {archivos.map((archivo) => (
