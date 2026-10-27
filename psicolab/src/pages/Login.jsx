@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { useSesion } from '../context/sesion'
 import { USUARIOS } from '../lib/sesion'
+import logo from '../assets/logo-aquachile-blanco.png'
 
 function Login() {
   const { usuario, iniciarSesion } = useSesion()
@@ -33,15 +34,14 @@ function Login() {
 
   return (
     <div className="login">
-      <form className="login-caja" onSubmit={enviar} noValidate>
-        <div className="logo mb-4">
-          <div className="logo-marca">AC</div>
-          <div className="logo-texto">
-            AquaChile
-            <small>Psicolaboral</small>
-          </div>
-        </div>
+      <section className="login-marca">
+        <img src={logo} alt="AquaChile" className="login-logo" />
+        <p className="login-lema">
+          Evaluación psicolaboral del área de Reclutamiento y Selección.
+        </p>
+      </section>
 
+      <form className="login-caja" onSubmit={enviar} noValidate>
         <h1 className="titulo mb-1">Iniciar sesión</h1>
         <p className="subtitulo mb-4">Acceso exclusivo del equipo de reclutamiento.</p>
 
