@@ -1,6 +1,7 @@
 import express from 'express'
 import cors from 'cors'
-import { carpetaDeCandidato, driveActivo, enlaceCarpeta } from './drive.js'
+import multer from 'multer'
+import { carpetaDeCandidato, driveActivo, enlaceCarpeta, subirArchivo } from './drive.js'
 import { bdConfigurada } from './bd/conexion.js'
 import * as bd from './bd/repositorio.js'
 
@@ -19,6 +20,18 @@ const ETAPAS = [
 ]
 
 const CATEGORIAS = ['Recomendado', 'Recomendado con observaciones', 'No recomendado']
+
+const ERROR_PDF = 'El CV debe ser un archivo PDF.'
+
+// El archivo se mantiene en memoria: va directo a Drive sin tocar el disco.
+const subida = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (req, archivo, cb) => {
+    if (archivo.mimetype !== 'application/pdf') return cb(new Error(ERROR_PDF))
+    cb(null, true)
+  },
+})
 
 app.get('/api/candidatos', async (req, res) => {
   res.json(await bd.listarCandidatos())
@@ -79,6 +92,29 @@ app.post('/api/solicitudes', async (req, res) => {
   res.status(201).json(await bd.crearSolicitud(nueva))
 })
 
+app.post('/api/solicitudes/:id/cv', subida.single('cv'), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).json({ error: 'Falta el archivo del CV.' })
+  }
+
+  const solicitud = await bd.obtenerSolicitud(req.params.id)
+  if (!solicitud) {
+    return res.status(404).json({ error: 'Solicitud no encontrada.' })
+  }
+  if (!solicitud.carpetaId) {
+    return res.status(409).json({ error: 'La solicitud no tiene carpeta en Drive.' })
+  }
+
+  const archivo = await subirArchivo({
+    carpetaId: solicitud.carpetaId,
+    nombre: req.file.originalname,
+    tipo: req.file.mimetype,
+    contenido: req.file.buffer,
+  })
+
+  res.status(201).json({ nombre: archivo.name, enlace: archivo.webViewLink })
+})
+
 app.patch('/api/solicitudes/:id', async (req, res) => {
   const { etapa, categoria } = req.body
 
@@ -96,11 +132,15 @@ app.patch('/api/solicitudes/:id', async (req, res) => {
   res.json(actualizada)
 })
 
-// Cualquier error de la base de datos llega aquí en vez de botar el servidor.
+// Cualquier error de la base de datos o de la subida llega aquí
+// en vez de botar el servidor.
 app.use((error, req, res, next) => {
   console.error(error)
   if (error.code === '23505') {
     return res.status(409).json({ error: 'Ya existe un candidato con ese correo.' })
+  }
+  if (error instanceof multer.MulterError || error.message === ERROR_PDF) {
+    return res.status(400).json({ error: error.message })
   }
   res.status(500).json({ error: 'Error interno del servidor.' })
 })

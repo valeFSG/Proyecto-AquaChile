@@ -42,3 +42,13 @@ export function actualizarCandidato(id, cambios) {
     'No se pudo actualizar el candidato.',
   )
 }
+
+export function subirCv(id, archivo) {
+  const datos = new FormData()
+  datos.append('cv', archivo)
+  return pedir(
+    `/solicitudes/${id}/cv`,
+    { method: 'POST', body: datos },
+    'No se pudo subir el CV.',
+  )
+}
