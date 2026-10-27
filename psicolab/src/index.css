@@ -399,3 +399,23 @@ body {
   color: var(--texto-sec); font-size: .75rem; padding: .3rem .7rem; transition: all .2s ease-in-out;
 }
 .btn-salir:hover { border-color: var(--rosa); color: var(--rosa); }
+
+/* Informes */
+.pill-ok { background: rgba(45,212,191,.14); color: var(--esmeralda); }
+.pill-obs { background: rgba(251,191,36,.14); color: var(--ambar); }
+.pill-no { background: rgba(251,113,133,.14); color: var(--rosa); }
+
+.observaciones {
+  font-size: .85rem;
+  line-height: 1.55;
+  margin: .7rem 0 0;
+}
+
+.enlace-carpeta {
+  color: var(--cian);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: all .2s ease-in-out;
+}
+
+.enlace-carpeta:hover { border-bottom-color: var(--cian); }

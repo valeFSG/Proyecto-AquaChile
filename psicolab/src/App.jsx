@@ -5,6 +5,7 @@ import Login from './pages/Login'
 import Dashboard from './pages/Dashboard'
 import Candidatos from './pages/Candidatos'
 import Solicitar from './pages/Solicitar'
+import Informes from './pages/Informes'
 import { ACCIONES } from './lib/sesion'
 
 function App() {
@@ -20,6 +21,7 @@ function App() {
       >
         <Route path="/" element={<Dashboard />} />
         <Route path="/candidatos" element={<Candidatos />} />
+        <Route path="/informes" element={<Informes />} />
         <Route
           path="/solicitar"
           element={
