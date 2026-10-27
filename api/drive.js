@@ -87,11 +87,9 @@ export async function copiarPlantillas(nombres, carpetaId) {
   const plantillasId = await buscarCarpeta('Plantillas', CARPETA_RAIZ)
   if (!plantillasId) return []
 
-  const copiadas = []
-
-  for (const nombre of nombres) {
+  const copias = nombres.map(async (nombre) => {
     const origen = await buscarArchivo(nombre, plantillasId)
-    if (!origen) continue
+    if (!origen) return null
 
     const { data } = await conectar().files.copy({
       fileId: origen,
@@ -99,8 +97,8 @@ export async function copiarPlantillas(nombres, carpetaId) {
       fields: 'name',
     })
 
-    copiadas.push(data.name)
-  }
+    return data.name
+  })
 
-  return copiadas
+  return (await Promise.all(copias)).filter(Boolean)
 }

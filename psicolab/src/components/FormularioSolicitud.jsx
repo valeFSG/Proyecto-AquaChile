@@ -19,6 +19,7 @@ function FormularioSolicitud({ onCrear, onCancelar }) {
   const [valores, setValores] = useState(VALORES_INICIALES)
   const [cv, setCv] = useState(null)
   const [errores, setErrores] = useState({})
+  const [guardando, setGuardando] = useState(false)
 
   const esInterno = valores.tipo === TIPOS.INTERNO
 
@@ -55,17 +56,24 @@ function FormularioSolicitud({ onCrear, onCancelar }) {
     return nuevos
   }
 
-  function enviar(evento) {
+    async function enviar(evento) {
     evento.preventDefault()
 
     const nuevosErrores = validar()
     setErrores(nuevosErrores)
     if (Object.keys(nuevosErrores).length > 0) return
 
-    onCrear({ ...valores, cv })
-    setValores(VALORES_INICIALES)
-    setCv(null)
-    evento.target.reset()
+    const formulario = evento.target
+    setGuardando(true)
+
+    try {
+      await onCrear({ ...valores, cv })
+      setValores(VALORES_INICIALES)
+      setCv(null)
+      formulario.reset()
+    } finally {
+      setGuardando(false)
+    }
   }
 
   return (
@@ -200,11 +208,16 @@ function FormularioSolicitud({ onCrear, onCancelar }) {
       </div>
 
       <div className="d-flex justify-content-end gap-2 mt-4">
-        <button type="button" className="btn-cancelar" onClick={onCancelar}>
+        <button
+          type="button"
+          className="btn-cancelar"
+          onClick={onCancelar}
+          disabled={guardando}
+        >
           Cancelar
         </button>
-        <button type="submit" className="btn btn-nuevo">
-          Crear solicitud
+        <button type="submit" className="btn btn-nuevo" disabled={guardando}>
+          {guardando ? 'Guardando…' : 'Crear solicitud'}
         </button>
       </div>
     </form>
