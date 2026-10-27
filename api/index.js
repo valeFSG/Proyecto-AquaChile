@@ -1,7 +1,10 @@
 import express from 'express'
 import cors from 'cors'
 import multer from 'multer'
-import { carpetaDeCandidato, driveActivo, enlaceCarpeta, subirArchivo } from './drive.js'
+import {
+  carpetaDeCandidato, copiarPlantillas, driveActivo, enlaceCarpeta, subirArchivo,
+} from './drive.js'
+import { PLANTILLAS } from './plantillas.js'
 import { bdConfigurada } from './bd/conexion.js'
 import * as bd from './bd/repositorio.js'
 
@@ -84,6 +87,7 @@ app.post('/api/solicitudes', async (req, res) => {
     try {
       nueva.carpetaId = await carpetaDeCandidato(candidato.nombre)
       nueva.carpetaUrl = enlaceCarpeta(nueva.carpetaId)
+      await copiarPlantillas(PLANTILLAS[familiaCargo] ?? [], nueva.carpetaId)
     } catch (error) {
       console.error('Drive no respondió:', error.message)
     }

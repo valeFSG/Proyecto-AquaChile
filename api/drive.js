@@ -71,3 +71,36 @@ export async function subirArchivo({ carpetaId, nombre, tipo, contenido }) {
 export function enlaceCarpeta(id) {
   return `https://drive.google.com/drive/folders/${id}`
 }
+
+async function buscarArchivo(nombre, padre) {
+  const seguro = nombre.replace(/'/g, "\\'")
+  const { data } = await conectar().files.list({
+    q: `name='${seguro}' and '${padre}' in parents and trashed=false`,
+    fields: 'files(id)',
+    pageSize: 1,
+  })
+  return data.files?.[0]?.id ?? null
+}
+
+// Copia las plantillas de la familia dentro de la carpeta del candidato.
+export async function copiarPlantillas(nombres, carpetaId) {
+  const plantillasId = await buscarCarpeta('Plantillas', CARPETA_RAIZ)
+  if (!plantillasId) return []
+
+  const copiadas = []
+
+  for (const nombre of nombres) {
+    const origen = await buscarArchivo(nombre, plantillasId)
+    if (!origen) continue
+
+    const { data } = await conectar().files.copy({
+      fileId: origen,
+      requestBody: { name: nombre, parents: [carpetaId] },
+      fields: 'name',
+    })
+
+    copiadas.push(data.name)
+  }
+
+  return copiadas
+}
