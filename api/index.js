@@ -150,7 +150,13 @@ if (!bdConfigurada()) {
   process.exit(1)
 }
 
-app.listen(3000, () => {
+app.listen(3000, (error) => {
+  if (error) {
+    console.error(error.code === 'EADDRINUSE'
+      ? 'El puerto 3000 ya está en uso: la API ya está encendida en otra terminal.'
+      : error.message)
+    process.exit(1)
+  }
   console.log('API escuchando en http://localhost:3000')
   console.log('Drive:', driveActivo() ? 'conectado' : 'apagado')
 })

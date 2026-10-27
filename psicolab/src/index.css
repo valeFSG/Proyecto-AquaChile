@@ -11,6 +11,8 @@
   --ambar: #fbbf24;
   --rosa: #fb7185;
   --esmeralda: #2dd4bf;
+  --marca: #435362;
+  --marca-osc: #26313c;
 }
 
 * { box-sizing: border-box; }
@@ -29,15 +31,11 @@ body {
   width: 232px; flex-shrink: 0; background: var(--panel);
   border-right: 1px solid var(--linea); padding: 1.5rem 1rem;
   display: flex; flex-direction: column;
+  position: sticky; top: 0; height: 100vh; overflow-y: auto;
 }
-.logo { display: flex; align-items: center; gap: .6rem; margin-bottom: 2rem; padding: 0 .5rem; }
-.logo-marca {
-  width: 32px; height: 32px; border-radius: 9px;
-  background: linear-gradient(135deg, var(--cian), var(--violeta));
-  display: grid; place-items: center; font-weight: 700; color: #0d1117; font-size: .9rem;
-}
-.logo-texto { font-weight: 600; font-size: .95rem; line-height: 1.15; }
-.logo-texto small { display: block; font-size: .7rem; color: var(--texto-sec); font-weight: 400; }
+.logo { display: flex; flex-direction: column; gap: .45rem; margin-bottom: 2rem; padding: 0 .5rem; }
+.logo-img { width: 150px; height: auto; }
+.logo-sub { font-size: .7rem; color: var(--texto-sec); letter-spacing: .02em; }
 
 .menu { display: flex; flex-direction: column; gap: .15rem; }
 .menu a {
@@ -101,8 +99,16 @@ body {
 .pill-ext { background: rgba(34,211,238,.13); color: var(--cian); }
 .pill-int { background: rgba(167,139,250,.14); color: var(--violeta); }
 
+.superior { display: none; }
+
 @media (max-width: 991px) {
+  .layout { flex-direction: column; }
   .lateral { display: none; }
+  .superior {
+    display: block; position: sticky; top: 0; z-index: 10;
+    background: var(--panel); border-bottom: 1px solid var(--linea);
+    padding: .75rem 1.25rem .5rem;
+  }
   .contenido { padding: 1.25rem; }
 }
 .selector-tipo {
@@ -379,16 +385,35 @@ body {
   color-scheme: dark;
 }
 
+/* Barra superior (pantallas chicas) */
+.superior-fila { display: flex; align-items: center; gap: .6rem; margin-bottom: .5rem; }
+.superior-isotipo { width: 26px; height: auto; }
+.superior-titulo { font-weight: 600; font-size: .95rem; }
+.menu-horizontal { flex-direction: row; overflow-x: auto; gap: .25rem; }
+.menu-horizontal a { white-space: nowrap; padding: .45rem .7rem; }
+
 /* Login */
-.login {
-  min-height: 100vh; display: flex; align-items: center; justify-content: center;
-  padding: 1.5rem; background: radial-gradient(circle at top, var(--panel-alto), var(--fondo) 60%);
+.login { min-height: 100vh; display: grid; grid-template-columns: 1.1fr 1fr; }
+.login-marca {
+  display: flex; flex-direction: column; justify-content: center; gap: 1.5rem;
+  padding: 3rem clamp(2rem, 6vw, 5rem);
+  background: linear-gradient(160deg, var(--marca), var(--marca-osc));
 }
+.login-logo { width: min(100%, 26rem); height: auto; }
+.login-lema { color: rgba(255,255,255,.75); font-size: 1rem; max-width: 24rem; margin: 0; line-height: 1.6; }
 .login-caja {
-  width: 100%; max-width: 24rem; background: var(--panel);
-  border: 1px solid var(--linea); border-radius: 16px; padding: 2rem;
+  align-self: center; justify-self: center; width: 100%; max-width: 24rem;
+  margin: 2rem 1.5rem; padding: 2rem;
+  background: var(--panel); border: 1px solid var(--linea); border-radius: 16px;
 }
 .login-demo { margin-top: 1.75rem; padding-top: 1.25rem; border-top: 1px solid var(--linea); }
+
+@media (max-width: 991px) {
+  .login { grid-template-columns: 1fr; }
+  .login-marca { padding: 2rem 1.5rem; gap: 1rem; align-items: center; text-align: center; }
+  .login-logo { width: min(100%, 18rem); }
+  .login-caja { margin: 1.5rem auto; }
+}
 .usuario-actual {
   margin-top: auto; padding: .9rem .5rem 0; border-top: 1px solid var(--linea);
   font-size: .8rem;
