@@ -6,6 +6,7 @@ import {
   renombrarCarpeta, subirArchivo,
 } from './servicios/google_drive.js'
 import { PLANTILLAS } from './plantillas.js'
+import { avisarCandidato, avisarReclutamiento, correoActivo } from './servicios/resend.js'
 import { bdConfigurada } from './bd/conexion.js'
 import * as bd from './bd/repositorio.js'
 
@@ -105,7 +106,19 @@ app.post('/api/solicitudes', async (req, res) => {
     }
   }
 
-  res.status(201).json(await bd.crearSolicitud(nueva))
+    const creada = await bd.crearSolicitud(nueva)
+
+  // Los correos son un aviso, no parte del registro: si fallan, la
+  // solicitud ya quedó guardada.
+  if (correoActivo()) {
+    try {
+      await Promise.all([avisarCandidato(creada), avisarReclutamiento(creada)])
+    } catch (error) {
+      console.error('No se pudieron enviar los correos:', error.message)
+    }
+  }
+
+  res.status(201).json(creada)
 })
 
 app.post('/api/solicitudes/:id/cv', subida.single('cv'), async (req, res) => {
