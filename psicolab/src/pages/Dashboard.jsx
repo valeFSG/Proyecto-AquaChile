@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { ETAPAS, TIPOS } from '../data/solicitudes'
-import {obtenerSolicitudes,actualizarSolicitud,actualizarCandidato,} from '../lib/api'
+import { obtenerSolicitudes, actualizarSolicitud } from '../services/solicitudes'
+import { actualizarCandidato } from '../services/candidatos'
 import MetricaResumen from '../components/MetricaResumen'
 import ColumnaKanban from '../components/ColumnaKanban'
 import DetalleSolicitud from '../components/DetalleSolicitud'

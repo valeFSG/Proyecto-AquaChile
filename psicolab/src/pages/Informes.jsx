@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { CATEGORIAS } from '../data/solicitudes'
-import { obtenerSolicitudes } from '../lib/api'
+import { obtenerSolicitudes } from '../services/solicitudes'
 
 const FILTROS = ['Todas', ...Object.values(CATEGORIAS)]
 

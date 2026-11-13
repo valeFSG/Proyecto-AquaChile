@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { crearSolicitud, subirCv } from '../lib/api'
+import { crearSolicitud, subirCv } from '../services/solicitudes'
 import { TIPOS } from '../data/solicitudes'
 import FormularioSolicitud from '../components/FormularioSolicitud'
 

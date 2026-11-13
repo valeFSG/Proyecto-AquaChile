@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { TIPOS, COLUMNAS } from '../data/solicitudes'
-import { obtenerSolicitudes, actualizarSolicitud } from '../lib/api'
+import { obtenerSolicitudes, actualizarSolicitud } from '../services/solicitudes'
 import { useSesion } from '../context/sesion'
 import { ACCIONES } from '../lib/sesion'
 
