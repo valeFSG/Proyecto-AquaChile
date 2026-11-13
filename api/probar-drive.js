@@ -1,4 +1,4 @@
-import { carpetaDeCandidato, enlaceCarpeta, subirArchivo } from './drive.js'
+import { carpetaDeCandidato, enlaceCarpeta, subirArchivo } from './servicios/google_drive.js'
 
 const nombre = 'María Fernanda Soto'
 

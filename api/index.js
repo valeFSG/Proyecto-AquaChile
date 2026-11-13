@@ -3,7 +3,7 @@ import cors from 'cors'
 import multer from 'multer'
 import {
   carpetaDeCandidato, copiarPlantillas, driveActivo, enlaceCarpeta, subirArchivo,
-} from './drive.js'
+} from './servicios/google_drive.js'
 import { PLANTILLAS } from './plantillas.js'
 import { bdConfigurada } from './bd/conexion.js'
 import * as bd from './bd/repositorio.js'
