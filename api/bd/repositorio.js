@@ -157,3 +157,14 @@ export async function actualizarSolicitud(id, cambios) {
   }
   return obtenerSolicitud(id)
 }
+
+// Devuelve la carpeta de Drive asociada a un candidato, si tiene alguna.
+export async function carpetaGuardada(candidatoId) {
+  const { rows } = await pool.query(
+    `SELECT carpeta_id FROM solicitud
+     WHERE candidato_id = $1 AND carpeta_id IS NOT NULL
+     LIMIT 1`,
+    [candidatoId],
+  )
+  return rows[0]?.carpeta_id ?? null
+}

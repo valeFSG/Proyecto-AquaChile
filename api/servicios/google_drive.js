@@ -102,3 +102,12 @@ export async function copiarPlantillas(nombres, carpetaId) {
 
   return (await Promise.all(copias)).filter(Boolean)
 }
+
+// La carpeta lleva el nombre de la persona, así que si el nombre cambia
+// hay que renombrarla para que no queden dos carpetas de alguien.
+export async function renombrarCarpeta(carpetaId, nombre) {
+  await conectar().files.update({
+    fileId: carpetaId,
+    requestBody: { name: nombre },
+  })
+}

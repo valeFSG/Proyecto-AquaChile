@@ -2,7 +2,8 @@ import express from 'express'
 import cors from 'cors'
 import multer from 'multer'
 import {
-  carpetaDeCandidato, copiarPlantillas, driveActivo, enlaceCarpeta, subirArchivo,
+  carpetaDeCandidato, copiarPlantillas, driveActivo, enlaceCarpeta,
+  renombrarCarpeta, subirArchivo,
 } from './servicios/google_drive.js'
 import { PLANTILLAS } from './plantillas.js'
 import { bdConfigurada } from './bd/conexion.js'
@@ -41,7 +42,7 @@ app.get('/api/candidatos', async (req, res) => {
 })
 
 app.patch('/api/candidatos/:id', async (req, res) => {
-  const { correo } = req.body
+  const { correo, nombre } = req.body
 
   if (correo && !correo.includes('@')) {
     return res.status(400).json({ error: 'El correo no es válido.' })
@@ -51,6 +52,17 @@ app.patch('/api/candidatos/:id', async (req, res) => {
   if (!actualizado) {
     return res.status(404).json({ error: 'Candidato no encontrado.' })
   }
+
+  // La carpeta de Drive lleva el nombre de la persona: si cambia, se renombra.
+  if (nombre && driveActivo()) {
+    try {
+      const carpetaId = await bd.carpetaGuardada(actualizado.id)
+      if (carpetaId) await renombrarCarpeta(carpetaId, actualizado.nombre)
+    } catch (error) {
+      console.error('No se pudo renombrar la carpeta:', error.message)
+    }
+  }
+
   res.json(actualizado)
 })
 
