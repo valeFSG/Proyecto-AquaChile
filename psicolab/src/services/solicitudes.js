@@ -34,3 +34,11 @@ export function agendarEntrevista(id, datos) {
     'No se pudo agendar la entrevista.',
   )
 }
+
+export function redactarInforme(id) {
+  return pedir(
+    `/solicitudes/${id}/informe`,
+    { method: 'POST' },
+    'No se pudo redactar el informe.',
+  )
+}

@@ -32,7 +32,8 @@ CREATE TABLE solicitud (
   carpeta_url     TEXT,
   fecha_entrevista TIMESTAMPTZ,
   entrevistador    TEXT,
-  evento_url       TEXT
+  evento_url       TEXT,
+  informe_url      TEXT
 );
 
 CREATE TABLE evaluacion (

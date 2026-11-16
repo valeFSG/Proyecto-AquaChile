@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import FormularioEntrevista from './FormularioEntrevista'
+import InformeIA from './InformeIA'
 import { planificarCarpeta } from '../lib/carpeta'
 import { ETAPAS, TIPOS, CATEGORIAS } from '../data/solicitudes'
 import { FAMILIAS } from '../data/catalogo'
@@ -20,6 +21,7 @@ function DetalleSolicitud({
   onCerrar,
   onAvanzar,
   onAgendar,
+  onRedactarInforme,
   onDescartar,
   onGuardarEvaluacion,
   onGuardarDatos,
@@ -406,6 +408,9 @@ function DetalleSolicitud({
         </div>
       )}
 
+      {puedeEvaluar && (
+        <InformeIA solicitud={solicitud} onRedactar={onRedactarInforme} />
+      )}
       <div className="bloque mb-4">
         <h2 className="bloque-titulo">Carpeta en Drive</h2>
 

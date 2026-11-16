@@ -8,6 +8,8 @@ import {
 import { PLANTILLAS } from './plantillas.js'
 import { avisarCandidato, avisarReclutamiento, correoActivo } from './servicios/resend.js'
 import { calendarioActivo, crearEntrevista } from './servicios/google_calendar.js'
+import { llmActivo } from './servicios/llm.js'
+import { redactarInforme } from './informe.js'
 import { bdConfigurada } from './bd/conexion.js'
 import * as bd from './bd/repositorio.js'
 
@@ -181,6 +183,22 @@ app.post('/api/solicitudes/:id/entrevista', async (req, res) => {
   }))
 })
 
+app.post('/api/solicitudes/:id/informe', async (req, res) => {
+  if (!llmActivo()) {
+    return res.status(503).json({ error: 'La redacción automática no está configurada.' })
+  }
+
+  const solicitud = await bd.obtenerSolicitud(req.params.id)
+  if (!solicitud) {
+    return res.status(404).json({ error: 'Solicitud no encontrada.' })
+  }
+
+  try {
+    res.json({ texto: await redactarInforme(solicitud) })
+  } catch (error) {
+    res.status(502).json({ error: error.message })
+  }
+})
 app.patch('/api/solicitudes/:id', async (req, res) => {
   const { etapa, categoria } = req.body
 

@@ -4,6 +4,7 @@ import {
   obtenerSolicitudes,
   actualizarSolicitud,
   agendarEntrevista,
+  redactarInforme,
 } from '../services/solicitudes'
 import { actualizarCandidato } from '../services/candidatos'
 import MetricaResumen from '../components/MetricaResumen'
@@ -113,6 +114,7 @@ function Dashboard() {
         onCerrar={() => setSeleccionada(null)}
         onAvanzar={avanzar}
         onAgendar={agendar}
+        onRedactarInforme={redactarInforme}
         onDescartar={descartar}
         onGuardarEvaluacion={guardarEvaluacion}
         onGuardarDatos={guardarDatos}
