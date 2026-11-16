@@ -2,10 +2,14 @@ import { useState } from 'react'
 import { FAMILIAS } from '../data/catalogo'
 import { TIPOS } from '../data/solicitudes'
 
+// En la demostración el correo viene relleno: Resend solo entrega a la
+// dirección dueña de la cuenta, así que escribirlo cada vez es perder tiempo.
+// Se configura en psicolab/.env y queda vacío si no existe.
+const CORREO_DEMO = import.meta.env.VITE_CORREO_DEMO ?? ''
 const VALORES_INICIALES = {
   tipo: TIPOS.EXTERNO,
   nombre: '',
-  correo: '',
+  correo: CORREO_DEMO,
   telefono: '',
   familiaCargo: '',
   cargo: '',

@@ -32,7 +32,7 @@ const marco = (titulo, cuerpo) => `
     ${cuerpo}
     <p style="color:#8a93a0;font-size:11px;border-top:1px solid #e3e7ec;padding-top:10px;margin-top:24px">
       Mensaje automático del sistema de evaluaciones psicolaborales.
-      Proyecto académico Duoc UC · DSY1104. Por favor no responder.
+       Por favor no responder.
     </p>
   </div>
 `
@@ -45,9 +45,10 @@ export async function avisarCandidato(solicitud) {
     asunto: `Recibimos tu postulación a ${solicitud.cargo}`,
     html: marco('Tu postulación quedó registrada', `
       <p>Hola ${nombre},</p>
-      <p>Recibimos tu postulación al cargo de <strong>${solicitud.cargo}</strong>.
-      Tu evaluación psicolaboral quedó registrada y el área de Reclutamiento y
-      Selección se pondrá en contacto para coordinar la entrevista.</p>
+      <p>Recibimos tu postulación al cargo de <strong>${solicitud.cargo}</strong>
+      y quedó registrada en nuestro proceso de selección.</p>
+      <p>El área de Reclutamiento y Selección se pondrá en contacto contigo para
+      coordinar la entrevista de evaluación psicolaboral.</p>
       <p>No necesitas hacer nada por ahora.</p>
     `),
   })
