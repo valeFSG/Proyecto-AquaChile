@@ -4,6 +4,7 @@ import InformeIA from './InformeIA'
 import { planificarCarpeta } from '../lib/carpeta'
 import { ETAPAS, TIPOS, CATEGORIAS } from '../data/solicitudes'
 import { FAMILIAS } from '../data/catalogo'
+import { COMPETENCIAS, NIVELES, NIVELES_NEGATIVOS } from '../data/competencias'
 
 const SIGUIENTE_ETAPA = {
   [ETAPAS.RECIBIDA]: ETAPAS.AGENDADA,
@@ -42,7 +43,14 @@ function DetalleSolicitud({
     observaciones: solicitud.observaciones ?? '',
   })
 
+  const [niveles, setNiveles] = useState(() => Object.fromEntries(
+    (solicitud.competencias ?? []).map((c) => [
+      c.competencia, { nivel: c.nivel, justificacion: c.justificacion ?? '' },
+    ]),
+  ))
+
   const { nombre: nombreCarpeta, archivos } = planificarCarpeta(solicitud)
+  const nombresCompetencias = COMPETENCIAS[solicitud.familiaCargo] ?? []
 
   const candidato = solicitud.candidato
   const esInterno = candidato?.tipo === TIPOS.INTERNO
@@ -51,6 +59,13 @@ function DetalleSolicitud({
   function cambiarEval(evento) {
     const { name, value } = evento.target
     setEvaluacion((previos) => ({ ...previos, [name]: value }))
+  }
+
+  function cambiarNivel(competencia, campo, valor) {
+    setNiveles((previos) => ({
+      ...previos,
+      [competencia]: { nivel: '', justificacion: '', ...previos[competencia], [campo]: valor },
+    }))
   }
 
   function cambiarDato(evento) {
@@ -141,10 +156,29 @@ function DetalleSolicitud({
       return
     }
 
+    const competencias = nombresCompetencias.map((nombre) => ({
+      competencia: nombre,
+      nivel: niveles[nombre]?.nivel ?? '',
+      justificacion: (niveles[nombre]?.justificacion ?? '').trim(),
+    }))
+
+    const sinNivel = competencias.find((c) => !c.nivel)
+    if (sinNivel) {
+      setErrorEval(`Elige el nivel de "${sinNivel.competencia}".`)
+      return
+    }
+    const sinJustificar = competencias.find(
+      (c) => NIVELES_NEGATIVOS.includes(c.nivel) && !c.justificacion,
+    )
+    if (sinJustificar) {
+      setErrorEval(`Justifica el nivel de "${sinJustificar.competencia}".`)
+      return
+    }
+
     setErrorEval(null)
     setGuardando(true)
     try {
-      await onGuardarEvaluacion(solicitud.id, evaluacion)
+      await onGuardarEvaluacion(solicitud.id, { ...evaluacion, competencias })
       setMensaje('Evaluación guardada.')
     } catch (err) {
       setErrorEval(err.message)
@@ -377,8 +411,55 @@ function DetalleSolicitud({
             </div>
 
             <div className="col-12">
+              <span className="campo-label d-block mb-2">
+                Competencias · {solicitud.familiaCargo}
+              </span>
+              <div className="competencias">
+                {nombresCompetencias.map((nombre, i) => {
+                  const valor = niveles[nombre] ?? { nivel: '', justificacion: '' }
+                  const negativo = NIVELES_NEGATIVOS.includes(valor.nivel)
+
+                  return (
+                    <div
+                      key={nombre}
+                      className={negativo ? 'competencia competencia-alerta' : 'competencia'}
+                    >
+                      <div className="competencia-fila">
+                        <label className="competencia-nombre" htmlFor={`nivel-${i}`}>
+                          {nombre}
+                        </label>
+                        <select
+                          id={`nivel-${i}`}
+                          className="campo-input competencia-nivel"
+                          value={valor.nivel}
+                          onChange={(e) => cambiarNivel(nombre, 'nivel', e.target.value)}
+                        >
+                          <option value="">Elegir nivel</option>
+                          {NIVELES.map((nivel) => (
+                            <option key={nivel} value={nivel}>{nivel}</option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {negativo && (
+                        <textarea
+                          aria-label={`Justificación de ${nombre}`}
+                          className="campo-input mt-2"
+                          rows="2"
+                          value={valor.justificacion}
+                          onChange={(e) => cambiarNivel(nombre, 'justificacion', e.target.value)}
+                          placeholder="¿Por qué este nivel? Es obligatorio."
+                        />
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+
+            <div className="col-12">
               <label className="campo-label" htmlFor="observaciones">
-                Observaciones
+                Notas de la entrevista
               </label>
               <textarea
                 id="observaciones"
@@ -387,7 +468,7 @@ function DetalleSolicitud({
                 rows="4"
                 value={evaluacion.observaciones}
                 onChange={cambiarEval}
-                placeholder="Fortalezas, oportunidades de desarrollo y conclusión general."
+                placeholder="Lo que observaste durante la entrevista. Es la base para redactar el informe."
               />
             </div>
           </fieldset>

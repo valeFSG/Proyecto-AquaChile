@@ -1,7 +1,7 @@
 import { pool } from './conexion.js'
 
 const SELECT_SOLICITUD = `
-  SELECT s.*, e.fecha AS fecha_evaluacion, e.categoria, e.observaciones,
+  SELECT s.*, e.fecha AS fecha_evaluacion, e.categoria, e.observaciones, e.competencias,
          c.id AS c_id, c.nombre, c.correo, c.telefono, c.tipo,
          c.area_actual, c.cargo_actual, c.antiguedad_anios
   FROM solicitud s
@@ -50,6 +50,7 @@ function aSolicitud(fila) {
     solicitud.categoria = fila.categoria
     solicitud.fechaEvaluacion = fila.fecha_evaluacion
     solicitud.observaciones = fila.observaciones
+    solicitud.competencias = fila.competencias ?? []
   }
   return solicitud
 }
@@ -138,18 +139,20 @@ export async function actualizarSolicitud(id, cambios) {
       return null
     }
 
-    const tocaEvaluacion = ['categoria', 'observaciones', 'fechaEvaluacion']
+    const tocaEvaluacion = ['categoria', 'observaciones', 'fechaEvaluacion', 'competencias']
       .some((campo) => cambios[campo] !== undefined)
 
     if (tocaEvaluacion) {
       await cliente.query(
-        `INSERT INTO evaluacion (solicitud_id, fecha, categoria, observaciones)
-         VALUES ($1, $2, $3, COALESCE($4, ''))
+        `INSERT INTO evaluacion (solicitud_id, fecha, categoria, observaciones, competencias)
+         VALUES ($1, $2, $3, COALESCE($4, ''), COALESCE($5::jsonb, '[]'))
          ON CONFLICT (solicitud_id) DO UPDATE SET
            fecha = COALESCE(EXCLUDED.fecha, evaluacion.fecha),
            categoria = COALESCE(EXCLUDED.categoria, evaluacion.categoria),
-           observaciones = COALESCE($4, evaluacion.observaciones)`,
-        [id, cambios.fechaEvaluacion || null, cambios.categoria || null, cambios.observaciones],
+           observaciones = COALESCE($4, evaluacion.observaciones),
+           competencias = COALESCE($5::jsonb, evaluacion.competencias)`,
+        [id, cambios.fechaEvaluacion || null, cambios.categoria || null, cambios.observaciones,
+          cambios.competencias ? JSON.stringify(cambios.competencias) : null],
       )
     }
 

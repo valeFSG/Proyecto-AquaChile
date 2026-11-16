@@ -444,3 +444,23 @@ body {
 }
 
 .enlace-carpeta:hover { border-bottom-color: var(--cian); }
+
+/* Competencias de la evaluación */
+.competencias { border: 1px solid var(--linea); border-radius: 10px; overflow: hidden; }
+.competencia {
+  padding: .75rem .9rem;
+  border-bottom: 1px solid var(--linea);
+  border-left: 3px solid transparent;
+  transition: all 0.2s ease-in-out;
+}
+.competencia:last-child { border-bottom: none; }
+.competencia:hover { background: var(--panel-alto); }
+.competencia-alerta { border-left-color: var(--ambar); }
+.competencia-fila { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.competencia-nombre { font-size: .88rem; }
+.competencia-nivel { max-width: 14rem; }
+
+@media (max-width: 575px) {
+  .competencia-fila { flex-direction: column; align-items: stretch; gap: .4rem; }
+  .competencia-nivel { max-width: none; }
+}

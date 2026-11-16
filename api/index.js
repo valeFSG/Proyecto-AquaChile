@@ -6,6 +6,7 @@ import {
   renombrarCarpeta, subirArchivo,
 } from './servicios/google_drive.js'
 import { PLANTILLAS } from './plantillas.js'
+import { limpiarCompetencias, validarCompetencias } from './competencias.js'
 import { avisarCandidato, avisarReclutamiento, correoActivo } from './servicios/resend.js'
 import { calendarioActivo, crearEntrevista } from './servicios/google_calendar.js'
 import { llmActivo } from './servicios/llm.js'
@@ -200,7 +201,7 @@ app.post('/api/solicitudes/:id/informe', async (req, res) => {
   }
 })
 app.patch('/api/solicitudes/:id', async (req, res) => {
-  const { etapa, categoria } = req.body
+  const { etapa, categoria, competencias, familiaCargo } = req.body
 
   if (etapa && !ETAPAS.includes(etapa)) {
     return res.status(400).json({ error: 'La etapa no es válida.' })
@@ -209,7 +210,20 @@ app.patch('/api/solicitudes/:id', async (req, res) => {
     return res.status(400).json({ error: 'La categoría no es válida.' })
   }
 
-  const actualizada = await bd.actualizarSolicitud(req.params.id, req.body)
+  const cambios = { ...req.body }
+
+  // Las competencias dependen de la familia del cargo, por eso se valida contra la solicitud.
+  if (competencias !== undefined) {
+    const actual = await bd.obtenerSolicitud(req.params.id)
+    if (!actual) {
+      return res.status(404).json({ error: 'Solicitud no encontrada.' })
+    }
+    const error = validarCompetencias(competencias, familiaCargo ?? actual.familiaCargo)
+    if (error) return res.status(400).json({ error })
+    cambios.competencias = limpiarCompetencias(competencias)
+  }
+
+  const actualizada = await bd.actualizarSolicitud(req.params.id, cambios)
   if (!actualizada) {
     return res.status(404).json({ error: 'Solicitud no encontrada.' })
   }

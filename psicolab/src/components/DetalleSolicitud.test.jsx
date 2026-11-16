@@ -1,9 +1,10 @@
 import { describe, it, expect, vi } from 'vitest'
-import { render, screen } from '@testing-library/react'
+import { render, screen, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import DetalleSolicitud from './DetalleSolicitud'
 import { solicitudesIniciales, ETAPAS } from '../data/solicitudes'
 import { candidatosIniciales } from '../data/candidatos'
+import { COMPETENCIAS } from '../data/competencias'
 
 const solicitud = { ...solicitudesIniciales[0], candidato: candidatosIniciales[0] }
 
@@ -103,5 +104,42 @@ describe('DetalleSolicitud', () => {
     renderizar({ onDescartar })
     await userEvent.click(screen.getByRole('button', { name: 'Descartar candidato' }))
     expect(onDescartar).toHaveBeenCalledWith('1')
+  })
+})
+describe('DetalleSolicitud · competencias', () => {
+  const completar = async (nivelPrimera) => {
+    fireEvent.change(screen.getByLabelText('Fecha de evaluación'), { target: { value: '2026-11-10' } })
+    await userEvent.selectOptions(screen.getByLabelText('Categoría del evaluado'), 'Recomendado')
+    const [primera, ...resto] = COMPETENCIAS.Operaciones
+    await userEvent.selectOptions(screen.getByLabelText(primera), nivelPrimera)
+    for (const nombre of resto) {
+      await userEvent.selectOptions(screen.getByLabelText(nombre), 'Satisfactorio')
+    }
+    return primera
+  }
+
+  it('no deja guardar un nivel negativo sin justificación', async () => {
+    const onGuardarEvaluacion = vi.fn()
+    renderizar({ onGuardarEvaluacion })
+    const primera = await completar('Por debajo de lo esperado')
+
+    expect(screen.getByLabelText(`Justificación de ${primera}`)).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: 'Guardar evaluación' }))
+
+    expect(screen.getByText(`Justifica el nivel de "${primera}".`)).toBeInTheDocument()
+    expect(onGuardarEvaluacion).not.toHaveBeenCalled()
+  })
+
+  it('guarda sin justificación cuando los niveles son positivos', async () => {
+    const onGuardarEvaluacion = vi.fn()
+    renderizar({ onGuardarEvaluacion })
+    const primera = await completar('Destacado')
+
+    expect(screen.queryByLabelText(`Justificación de ${primera}`)).not.toBeInTheDocument()
+    await userEvent.click(screen.getByRole('button', { name: 'Guardar evaluación' }))
+
+    const [, datos] = onGuardarEvaluacion.mock.calls[0]
+    expect(datos.competencias).toHaveLength(5)
+    expect(datos.competencias[0]).toMatchObject({ competencia: primera, nivel: 'Destacado' })
   })
 })

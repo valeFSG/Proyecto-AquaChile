@@ -42,7 +42,8 @@ CREATE TABLE evaluacion (
   fecha         DATE,
   categoria     TEXT CHECK (categoria IN (
                   'Recomendado', 'Recomendado con observaciones', 'No recomendado')),
-  observaciones TEXT NOT NULL DEFAULT ''
+  observaciones TEXT NOT NULL DEFAULT '',
+  competencias  JSONB NOT NULL DEFAULT '[]' CHECK (jsonb_typeof(competencias) = 'array')
 );
 
 INSERT INTO candidato (id, nombre, correo, telefono, tipo, area_actual, cargo_actual, antiguedad_anios) VALUES
