@@ -337,62 +337,62 @@ function DetalleSolicitud({
         </>
       )}
 
-      <div className="bloque mb-3">
-        <h2 className="bloque-titulo">Evaluación psicolaboral</h2>
+            {puedeEvaluar && (
+        <div className="bloque mb-3">
+          <h2 className="bloque-titulo">Evaluación psicolaboral</h2>
 
-        <fieldset disabled={!puedeEvaluar} className="row g-3">
-          <div className="col-12 col-md-4">
-            <label className="campo-label" htmlFor="fechaEvaluacion">
-              Fecha de evaluación
-            </label>
-            <input
-              id="fechaEvaluacion"
-              name="fechaEvaluacion"
-              type="date"
-              className="campo-input"
-              value={evaluacion.fechaEvaluacion}
-              onChange={cambiarEval}
-            />
-          </div>
+          <fieldset className="row g-3">
+            <div className="col-12 col-md-4">
+              <label className="campo-label" htmlFor="fechaEvaluacion">
+                Fecha de evaluación
+              </label>
+              <input
+                id="fechaEvaluacion"
+                name="fechaEvaluacion"
+                type="date"
+                className="campo-input"
+                value={evaluacion.fechaEvaluacion}
+                onChange={cambiarEval}
+              />
+            </div>
 
-          <div className="col-12 col-md-8">
-            <label className="campo-label" htmlFor="categoria">
-              Categoría del evaluado
-            </label>
-            <select
-              id="categoria"
-              name="categoria"
-              className="campo-input"
-              value={evaluacion.categoria}
-              onChange={cambiarEval}
-            >
-              <option value="">Sin evaluar</option>
-              {Object.values(CATEGORIAS).map((opcion) => (
-                <option key={opcion} value={opcion}>{opcion}</option>
-              ))}
-            </select>
-          </div>
+            <div className="col-12 col-md-8">
+              <label className="campo-label" htmlFor="categoria">
+                Categoría del evaluado
+              </label>
+              <select
+                id="categoria"
+                name="categoria"
+                className="campo-input"
+                value={evaluacion.categoria}
+                onChange={cambiarEval}
+              >
+                <option value="">Sin evaluar</option>
+                {Object.values(CATEGORIAS).map((opcion) => (
+                  <option key={opcion} value={opcion}>{opcion}</option>
+                ))}
+              </select>
+            </div>
 
-          <div className="col-12">
-            <label className="campo-label" htmlFor="observaciones">
-              Observaciones
-            </label>
-            <textarea
-              id="observaciones"
-              name="observaciones"
-              className="campo-input campo-area"
-              rows="4"
-              value={evaluacion.observaciones}
-              onChange={cambiarEval}
-              placeholder="Fortalezas, oportunidades de desarrollo y conclusión general."
-            />
-          </div>
-        </fieldset>
+            <div className="col-12">
+              <label className="campo-label" htmlFor="observaciones">
+                Observaciones
+              </label>
+              <textarea
+                id="observaciones"
+                name="observaciones"
+                className="campo-input campo-area"
+                rows="4"
+                value={evaluacion.observaciones}
+                onChange={cambiarEval}
+                placeholder="Fortalezas, oportunidades de desarrollo y conclusión general."
+              />
+            </div>
+          </fieldset>
 
-        {errorEval && <span className="campo-error d-block mt-2">{errorEval}</span>}
-        {mensaje && <span className="campo-ayuda d-block mt-2">{mensaje}</span>}
+          {errorEval && <span className="campo-error d-block mt-2">{errorEval}</span>}
+          {mensaje && <span className="campo-ayuda d-block mt-2">{mensaje}</span>}
 
-        {puedeEvaluar && (
           <div className="d-flex justify-content-end mt-3">
             <button
               type="button"
@@ -403,8 +403,8 @@ function DetalleSolicitud({
               Guardar evaluación
             </button>
           </div>
-        )}
-      </div>
+        </div>
+      )}
 
       <div className="bloque mb-4">
         <h2 className="bloque-titulo">Carpeta en Drive</h2>
