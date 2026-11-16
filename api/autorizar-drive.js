@@ -5,6 +5,11 @@ import 'dotenv/config'
 const PUERTO = 5566
 const REDIRECCION = `http://localhost:${PUERTO}`
 
+if (!process.env.DRIVE_CLIENT_ID || !process.env.DRIVE_CLIENT_SECRET) {
+  console.error('\nFalta DRIVE_CLIENT_ID o DRIVE_CLIENT_SECRET en el archivo .env\n')
+  process.exit(1)
+}
+
 const auth = new google.auth.OAuth2(
   process.env.DRIVE_CLIENT_ID,
   process.env.DRIVE_CLIENT_SECRET,
@@ -14,14 +19,26 @@ const auth = new google.auth.OAuth2(
 const url = auth.generateAuthUrl({
   access_type: 'offline',
   prompt: 'consent',
-  scope: ['https://www.googleapis.com/auth/drive'],
+  scope: [
+    'https://www.googleapis.com/auth/drive',
+    'https://www.googleapis.com/auth/calendar.events',
+  ],
 })
 
 const servidor = http.createServer(async (req, res) => {
-  const codigo = new URL(req.url, REDIRECCION).searchParams.get('code')
+  const peticion = new URL(req.url, REDIRECCION)
 
+  if (peticion.pathname !== '/') {
+    res.writeHead(404).end()
+    return
+  }
+
+  const codigo = peticion.searchParams.get('code')
+
+  // Primera visita: se redirige a Google. Así no hay que copiar un link
+  // largo desde la terminal, que es donde se corta.
   if (!codigo) {
-    res.end('Falta el codigo.')
+    res.writeHead(302, { Location: url }).end()
     return
   }
 
@@ -39,6 +56,5 @@ const servidor = http.createServer(async (req, res) => {
 })
 
 servidor.listen(PUERTO, () => {
-  console.log('\nAbre este link en el navegador:\n')
-  console.log(url + '\n')
+  console.log(`\nAbre en el navegador: ${REDIRECCION}\n`)
 })

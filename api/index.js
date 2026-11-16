@@ -7,6 +7,7 @@ import {
 } from './servicios/google_drive.js'
 import { PLANTILLAS } from './plantillas.js'
 import { avisarCandidato, avisarReclutamiento, correoActivo } from './servicios/resend.js'
+import { calendarioActivo, crearEntrevista } from './servicios/google_calendar.js'
 import { bdConfigurada } from './bd/conexion.js'
 import * as bd from './bd/repositorio.js'
 
@@ -142,6 +143,42 @@ app.post('/api/solicitudes/:id/cv', subida.single('cv'), async (req, res) => {
   })
 
   res.status(201).json({ nombre: archivo.name, enlace: archivo.webViewLink })
+})
+app.post('/api/solicitudes/:id/entrevista', async (req, res) => {
+  const { fecha, hora, duracionMin, entrevistador } = req.body
+
+  if (!fecha || !hora || !entrevistador) {
+    return res.status(400).json({ error: 'Faltan la fecha, la hora o el entrevistador.' })
+  }
+
+  const solicitud = await bd.obtenerSolicitud(req.params.id)
+  if (!solicitud) {
+    return res.status(404).json({ error: 'Solicitud no encontrada.' })
+  }
+
+  // El evento es un apoyo: si el calendario falla, la entrevista igual
+  // queda agendada en el sistema.
+  let eventoUrl = null
+
+  if (calendarioActivo()) {
+    try {
+      eventoUrl = await crearEntrevista({
+        solicitud,
+        fecha,
+        hora,
+        duracionMin: Number(duracionMin) || 60,
+        entrevistador,
+      })
+    } catch (error) {
+      console.error('No se pudo crear el evento:', error.message)
+    }
+  }
+
+  res.json(await bd.agendarEntrevista(req.params.id, {
+    fechaEntrevista: `${fecha}T${hora}:00`,
+    entrevistador,
+    eventoUrl,
+  }))
 })
 
 app.patch('/api/solicitudes/:id', async (req, res) => {

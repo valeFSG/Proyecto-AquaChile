@@ -13,6 +13,7 @@ const renderizar = (props = {}) =>
       solicitud={solicitud}
       onCerrar={vi.fn()}
       onAvanzar={vi.fn()}
+      onAgendar={vi.fn()}
       onDescartar={vi.fn()}
       onGuardarEvaluacion={vi.fn()}
       onGuardarDatos={vi.fn()}
@@ -45,11 +46,56 @@ describe('DetalleSolicitud', () => {
     )
   })
 
-  it('llama a onAvanzar con la siguiente etapa', async () => {
+    it('muestra el enlace al evento cuando la entrevista está agendada', () => {
+    renderizar({
+      solicitud: {
+        ...solicitud,
+        fechaEntrevista: '2026-11-20 15:00:00',
+        entrevistador: 'Camila Rojas',
+        eventoUrl: 'https://calendar.google.com/event?eid=abc',
+      },
+    })
+    expect(screen.getByText('2026-11-20 · 15:00')).toBeInTheDocument()
+    expect(
+      screen.getByRole('link', { name: 'Abrir el evento en Google Calendar' }),
+    ).toHaveAttribute('href', 'https://calendar.google.com/event?eid=abc')
+  })
+
+  it('pide los datos de la entrevista antes de agendar', async () => {
     const onAvanzar = vi.fn()
-    renderizar({ onAvanzar })
-    await userEvent.click(screen.getByRole('button', { name: `Avanzar a ${ETAPAS.AGENDADA}` }))
-    expect(onAvanzar).toHaveBeenCalledWith('1', ETAPAS.AGENDADA)
+    const onAgendar = vi.fn()
+    renderizar({ onAvanzar, onAgendar })
+
+    await userEvent.click(
+      screen.getByRole('button', { name: `Avanzar a ${ETAPAS.AGENDADA}` }),
+    )
+    expect(onAvanzar).not.toHaveBeenCalled()
+
+    await userEvent.type(screen.getByLabelText('Fecha'), '2026-11-20')
+    await userEvent.type(screen.getByLabelText('Hora'), '15:00')
+    await userEvent.type(screen.getByLabelText('Entrevistador'), 'Camila Rojas')
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Agendar y crear evento' }),
+    )
+
+    expect(onAgendar).toHaveBeenCalledWith('1', {
+      fecha: '2026-11-20',
+      hora: '15:00',
+      duracionMin: 60,
+      entrevistador: 'Camila Rojas',
+    })
+  })
+
+  it('avanza directo cuando la etapa siguiente no es la entrevista', async () => {
+    const onAvanzar = vi.fn()
+    renderizar({
+      onAvanzar,
+      solicitud: { ...solicitud, etapa: ETAPAS.REALIZADA },
+    })
+    await userEvent.click(
+      screen.getByRole('button', { name: `Avanzar a ${ETAPAS.ENVIADA}` }),
+    )
+    expect(onAvanzar).toHaveBeenCalledWith('1', ETAPAS.ENVIADA)
   })
 
   it('llama a onDescartar con el id del candidato', async () => {

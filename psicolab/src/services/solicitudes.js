@@ -26,3 +26,11 @@ export function subirCv(id, archivo) {
     'No se pudo subir el CV.',
   )
 }
+
+export function agendarEntrevista(id, datos) {
+  return pedir(
+    `/solicitudes/${id}/entrevista`,
+    conJson('POST', datos),
+    'No se pudo agendar la entrevista.',
+  )
+}

@@ -1,6 +1,10 @@
 import { useState, useEffect } from 'react'
 import { ETAPAS, TIPOS } from '../data/solicitudes'
-import { obtenerSolicitudes, actualizarSolicitud } from '../services/solicitudes'
+import {
+  obtenerSolicitudes,
+  actualizarSolicitud,
+  agendarEntrevista,
+} from '../services/solicitudes'
 import { actualizarCandidato } from '../services/candidatos'
 import MetricaResumen from '../components/MetricaResumen'
 import ColumnaKanban from '../components/ColumnaKanban'
@@ -72,6 +76,11 @@ function Dashboard() {
     }
   }
 
+    async function agendar(id, datos) {
+    const actualizada = await agendarEntrevista(id, datos)
+    reemplazar(actualizada)
+    setSeleccionada(actualizada)
+  }
   async function descartar(id) {
     try {
       const actualizada = await actualizarSolicitud(id, { descartada: true })
@@ -103,6 +112,7 @@ function Dashboard() {
         solicitud={seleccionada}
         onCerrar={() => setSeleccionada(null)}
         onAvanzar={avanzar}
+        onAgendar={agendar}
         onDescartar={descartar}
         onGuardarEvaluacion={guardarEvaluacion}
         onGuardarDatos={guardarDatos}

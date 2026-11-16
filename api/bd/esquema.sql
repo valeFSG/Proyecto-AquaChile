@@ -29,7 +29,10 @@ CREATE TABLE solicitud (
   descartada      BOOLEAN NOT NULL DEFAULT FALSE,
   fecha_solicitud DATE NOT NULL DEFAULT CURRENT_DATE,
   carpeta_id      TEXT,
-  carpeta_url     TEXT
+  carpeta_url     TEXT,
+  fecha_entrevista TIMESTAMPTZ,
+  entrevistador    TEXT,
+  evento_url       TEXT
 );
 
 CREATE TABLE evaluacion (

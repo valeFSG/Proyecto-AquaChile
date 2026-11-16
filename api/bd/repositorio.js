@@ -41,6 +41,11 @@ function aSolicitud(fila) {
     solicitud.carpetaId = fila.carpeta_id
     solicitud.carpetaUrl = fila.carpeta_url
   }
+    if (fila.fecha_entrevista) {
+    solicitud.fechaEntrevista = fila.fecha_entrevista
+    solicitud.entrevistador = fila.entrevistador
+    solicitud.eventoUrl = fila.evento_url
+  }
   if (fila.categoria || fila.fecha_evaluacion || fila.observaciones) {
     solicitud.categoria = fila.categoria
     solicitud.fechaEvaluacion = fila.fecha_evaluacion
@@ -167,4 +172,20 @@ export async function carpetaGuardada(candidatoId) {
     [candidatoId],
   )
   return rows[0]?.carpeta_id ?? null
+}
+
+// Guarda la entrevista y deja la solicitud en la etapa correspondiente.
+export async function agendarEntrevista(id, datos) {
+  const { rows } = await pool.query(
+    `UPDATE solicitud
+        SET fecha_entrevista = $2,
+            entrevistador    = $3,
+            evento_url       = $4,
+            etapa            = 'Entrevista agendada'
+      WHERE id = $1
+      RETURNING id`,
+    [id, datos.fechaEntrevista, datos.entrevistador, datos.eventoUrl],
+  )
+
+  return rows[0] ? obtenerSolicitud(id) : null
 }

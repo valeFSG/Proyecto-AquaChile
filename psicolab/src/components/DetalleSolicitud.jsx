@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import FormularioEntrevista from './FormularioEntrevista'
 import { planificarCarpeta } from '../lib/carpeta'
 import { ETAPAS, TIPOS, CATEGORIAS } from '../data/solicitudes'
 import { FAMILIAS } from '../data/catalogo'
@@ -11,10 +12,14 @@ const SIGUIENTE_ETAPA = {
   [ETAPAS.JEFATURA]: ETAPAS.CONTRATACION,
 }
 
+// La fecha llega como '2026-11-20 15:00:00'; se muestra sin los segundos.
+const fechaHora = (valor) => String(valor).slice(0, 16).replace(' ', ' · ')
+
 function DetalleSolicitud({
   solicitud,
   onCerrar,
   onAvanzar,
+  onAgendar,
   onDescartar,
   onGuardarEvaluacion,
   onGuardarDatos,
@@ -28,6 +33,7 @@ function DetalleSolicitud({
   const [editando, setEditando] = useState(false)
   const [errorDatos, setErrorDatos] = useState(null)
   const [datos, setDatos] = useState(null)
+  const [agendando, setAgendando] = useState(false)
   const [evaluacion, setEvaluacion] = useState({
     fechaEvaluacion: solicitud.fechaEvaluacion ?? '',
     categoria: solicitud.categoria ?? '',
@@ -400,7 +406,7 @@ function DetalleSolicitud({
         )}
       </div>
 
-            <div className="bloque mb-4">
+      <div className="bloque mb-4">
         <h2 className="bloque-titulo">Carpeta en Drive</h2>
 
         {solicitud.carpetaUrl ? (
@@ -431,14 +437,58 @@ function DetalleSolicitud({
         </div>
       </div>
 
-      {puedeMover && (
+      {solicitud.fechaEntrevista && (
+        <div className="bloque mb-4">
+          <h2 className="bloque-titulo">Entrevista</h2>
+
+          <div className="row g-3">
+            <div className="col-6 col-md-4">
+              <div className="dato-label">Fecha y hora</div>
+              <div className="dato-valor">{fechaHora(solicitud.fechaEntrevista)}</div>
+            </div>
+            <div className="col-6 col-md-4">
+              <div className="dato-label">Entrevistador</div>
+              <div className="dato-valor">{solicitud.entrevistador ?? '—'}</div>
+            </div>
+          </div>
+
+          {solicitud.eventoUrl && (
+            <p className="ruta mt-3 mb-0">
+              <a
+                className="enlace-carpeta"
+                href={solicitud.eventoUrl}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Abrir el evento en Google Calendar
+              </a>
+            </p>
+          )}
+        </div>
+      )}
+
+      {agendando && (
+        <FormularioEntrevista
+          onCancelar={() => setAgendando(false)}
+          onConfirmar={async (datosEntrevista) => {
+            await onAgendar(solicitud.id, datosEntrevista)
+            setAgendando(false)
+          }}
+        />
+      )}
+
+      {puedeMover && !agendando && (
         <div className="d-flex gap-2 flex-wrap">
           {siguiente && (
             <button
               type="button"
               className="btn btn-nuevo"
               disabled={guardando}
-              onClick={() => accion(() => onAvanzar(solicitud.id, siguiente))}
+              onClick={() =>
+                siguiente === ETAPAS.AGENDADA
+                  ? setAgendando(true)
+                  : accion(() => onAvanzar(solicitud.id, siguiente))
+              }
             >
               Avanzar a {siguiente}
             </button>
