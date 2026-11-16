@@ -30,7 +30,7 @@ CREATE TABLE solicitud (
   fecha_solicitud DATE NOT NULL DEFAULT CURRENT_DATE,
   carpeta_id      TEXT,
   carpeta_url     TEXT,
-  fecha_entrevista TIMESTAMPTZ,
+  fecha_entrevista TIMESTAMP,
   entrevistador    TEXT,
   evento_url       TEXT,
   informe_url      TEXT
