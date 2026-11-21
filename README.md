@@ -60,9 +60,21 @@ DRIVE_CLIENT_ID=
 DRIVE_CLIENT_SECRET=
 DRIVE_REFRESH_TOKEN=
 DRIVE_CARPETA_RAIZ=
+
+JWT_SECRET=
 ```
 
-`DATABASE_URL` es obligatoria. Las cuatro variables de Drive son opcionales: sin
+`DATABASE_URL` es obligatoria. `JWT_SECRET` firma las sesiones; para generarla
+al azar, dentro de `api`:
+
+```bash
+printf '\nJWT_SECRET=%s\n' "$(node.exe -e "console.log(require('crypto').randomBytes(32).toString('hex'))")" >> .env
+```
+
+(En Mac o Linux, `node` en vez de `node.exe`.) Si falta, la API arranca igual,
+pero las sesiones se cierran cada vez que se reinicia.
+
+Las cuatro variables de Drive son opcionales: sin
 ellas la aplicación funciona igual, solo que no genera las carpetas.
 
 Para crear las tablas y cargar los datos de ejemplo:
@@ -73,6 +85,15 @@ npm run bd:iniciar
 
 > Este comando **borra todo** y deja únicamente los datos de ejemplo. No lo
 > ejecutes sobre una base con información que quieras conservar.
+
+Si la base ya existe, se actualiza sin perder datos con las migraciones:
+
+```bash
+node bd/migracion-entrevista.js
+node bd/migracion-informe.js
+node bd/migracion-competencias.js
+node bd/migracion-usuarios.js
+```
 
 Levantar el servidor:
 
@@ -103,10 +124,24 @@ La aplicación queda en `http://localhost:5173`.
 | evaluador@aquachile.demo | evaluador123 | Profesional Evaluador |
 | jefatura@aquachile.demo | jefatura123 | Jefatura (solo lectura) |
 
-La autenticación es simulada: no hay registro de usuarios ni validación contra
-la base de datos. Está definida en `psicolab/src/lib/sesion.js`.
+Los usuarios viven en la tabla `usuario` de la base, con la contraseña guardada
+solo como hash bcrypt. El login (`POST /api/login`) entrega un token JWT que
+dura 8 horas; el frontend lo manda en cada petición y, si vence, vuelve al login.
+
+La API valida el token y el permiso del rol en cada endpoint: sin token responde
+401 y con un rol sin permiso responde 403. Los permisos están en
+`api/permisos.js` y `psicolab/src/lib/sesion.js`.
 
 ## Pruebas
+
+Backend (la base y los servicios externos van simulados):
+
+```bash
+cd api
+npm test
+```
+
+Frontend:
 
 ```bash
 cd psicolab

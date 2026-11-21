@@ -45,8 +45,9 @@ noviembre al 5 de diciembre).
 | Profesional Evaluador | Revisa antecedentes y registra el resultado de la evaluación | Mover etapa, registrar evaluación |
 | Jefatura | Consulta el estado del proceso | Solo lectura |
 
-La autenticación es simulada, conforme al anexo, que permite simplificar la
-administración de identidad dentro del alcance académico.
+La autenticación es real: los usuarios se guardan en la base con la contraseña
+en hash (bcrypt), el inicio de sesión entrega un token firmado (JWT) y la API
+valida el token y el permiso del rol en cada operación. Ver sección 7.
 
 ## 5. Requisitos funcionales
 
@@ -82,7 +83,8 @@ incorporaron por su aporte directo a la problemática levantada.
 
 | Funcionalidad | Justificación |
 |---|---|
-| Control de acceso por rol y por acción | Separa la responsabilidad del analista y la del evaluador, tal como ocurre en el proceso real |
+| Control de acceso por rol y por acción, validado en la API | Separa la responsabilidad del analista y la del evaluador, tal como ocurre en el proceso real, y evita que alguien opere la API sin iniciar sesión |
+| Evaluación por competencias con justificación obligatoria | Cada competencia lleva un nivel; los niveles negativos exigen una justificación, para que toda evaluación desfavorable quede fundamentada |
 | Distinción entre postulante externo y movimiento interno | El proceso real contempla trabajadores que postulan a otra área, con antecedentes distintos |
 | Creación automática de la carpeta del candidato en Google Drive | Elimina la tarea manual descrita en la problemática |
 | Carga del currículum a la carpeta del candidato | Elimina la descarga y copia manual del archivo |
@@ -105,6 +107,20 @@ modelo genérico.
 
 Se reemplazó el RUT por el correo electrónico como identificador único, para
 reducir el tratamiento de datos personales sensibles en un prototipo académico.
+
+### Autenticación real
+
+El anexo permite una autenticación simulada. Se optó por una real (usuarios en
+la base con contraseña en hash, token JWT y validación de permisos en la API),
+porque con roles solo en el frontend cualquiera podía crear o modificar
+registros llamando a la API directamente. Esto agrega la tabla `usuario`, que
+es de soporte y no una entidad del negocio.
+
+### Competencias dentro de la evaluación
+
+Los niveles por competencia y sus justificaciones se guardan dentro de la
+entidad Evaluación (columna JSONB `competencias`), para mantener las tres
+entidades que pide el anexo.
 
 ### Datos de prueba
 
@@ -133,18 +149,21 @@ microservicios ni infraestructura distribuida.
 | Frontend | React 19 + Vite, Bootstrap 5, React Router |
 | Backend | Node.js + Express (aplicación monolítica) |
 | Base de datos | PostgreSQL |
-| Pruebas | Vitest + React Testing Library |
+| Seguridad | Contraseñas con bcrypt, sesiones con JWT |
+| Pruebas | Vitest + React Testing Library (frontend), Vitest + Supertest (API) |
 | Automatización documental | Google Drive API mediante OAuth |
 
 ## 10. Modelo de datos
 
-Tres entidades, conforme a la sección 7 del anexo.
+Tres entidades del negocio, conforme a la sección 7 del anexo, más una tabla de
+usuarios para la autenticación.
 
 | Entidad | Atributos principales |
 |---|---|
 | Candidato | Nombre, correo, teléfono, tipo, área y cargo actual, antigüedad |
 | Solicitud | Candidato asociado, cargo, familia de cargo, analista, CV, etapa, fecha, carpeta en Drive |
-| Evaluación | Solicitud asociada, fecha, categoría del resultado, observaciones |
+| Evaluación | Solicitud asociada, fecha, categoría del resultado, notas de la entrevista (columna `observaciones`), competencias con su nivel y justificación |
+| Usuario (soporte) | Correo, nombre, rol, hash de la contraseña |
 
 ## 11. Flujo principal
 
