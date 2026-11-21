@@ -270,21 +270,26 @@ app.use((error, req, res, next) => {
   res.status(500).json({ error: 'Error interno del servidor.' })
 })
 
-if (!bdConfigurada()) {
-  console.error('Falta DATABASE_URL en api/.env. Revisa api/.env.example.')
-  process.exit(1)
-}
-
-app.listen(3000, (error) => {
-  if (error) {
-    console.error(error.code === 'EADDRINUSE'
-      ? 'El puerto 3000 ya está en uso: la API ya está encendida en otra terminal.'
-      : error.message)
+// Las pruebas importan la app sin encender el servidor ni conectarse a la base.
+if (!process.env.VITEST) {
+  if (!bdConfigurada()) {
+    console.error('Falta DATABASE_URL en api/.env. Revisa api/.env.example.')
     process.exit(1)
   }
-  console.log('API escuchando en http://localhost:3000')
-  console.log('Drive:', driveActivo() ? 'conectado' : 'apagado')
-  if (secretoTemporal()) {
-    console.warn('Falta JWT_SECRET en api/.env: las sesiones se cerrarán al reiniciar el API.')
-  }
-})
+
+  app.listen(3000, (error) => {
+    if (error) {
+      console.error(error.code === 'EADDRINUSE'
+        ? 'El puerto 3000 ya está en uso: la API ya está encendida en otra terminal.'
+        : error.message)
+      process.exit(1)
+    }
+    console.log('API escuchando en http://localhost:3000')
+    console.log('Drive:', driveActivo() ? 'conectado' : 'apagado')
+    if (secretoTemporal()) {
+      console.warn('Falta JWT_SECRET en api/.env: las sesiones se cerrarán al reiniciar el API.')
+    }
+  })
+}
+
+export default app
