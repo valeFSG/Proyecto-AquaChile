@@ -1,9 +1,10 @@
 import { useState } from 'react'
 
-function InformeIA({ solicitud, onRedactar }) {
+function InformeIA({ solicitud, onRedactar, onSubir }) {
   const [texto, setTexto] = useState('')
   const [error, setError] = useState(null)
   const [cargando, setCargando] = useState(false)
+  const [subiendo, setSubiendo] = useState(false)
 
   const hayNotas = Boolean(solicitud.observaciones?.trim())
 
@@ -20,9 +21,35 @@ function InformeIA({ solicitud, onRedactar }) {
     }
   }
 
+  async function subir() {
+    setError(null)
+    setSubiendo(true)
+    try {
+      await onSubir(solicitud.id, texto)
+      setTexto('')
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setSubiendo(false)
+    }
+  }
+
   return (
     <div className="bloque mb-4">
       <h2 className="bloque-titulo">Informe psicolaboral</h2>
+
+      {solicitud.informeUrl && (
+        <p className="ruta">
+          <a
+            className="enlace-carpeta"
+            href={solicitud.informeUrl}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Abrir el informe en Drive
+          </a>
+        </p>
+      )}
 
       {!hayNotas && (
         <p className="campo-ayuda mb-0">
@@ -35,7 +62,7 @@ function InformeIA({ solicitud, onRedactar }) {
         <>
           <p className="campo-ayuda">
             Redacta un borrador a partir de las observaciones guardadas. Revísalo
-            y corrígelo antes de darlo por bueno.
+            y corrígelo antes de subirlo a la carpeta del candidato.
           </p>
           <button
             type="button"
@@ -43,7 +70,7 @@ function InformeIA({ solicitud, onRedactar }) {
             disabled={cargando}
             onClick={generar}
           >
-            {cargando ? 'Redactando…' : 'Redactar borrador'}
+            {cargando ? 'Redactando…' : solicitud.informeUrl ? 'Redactar otra versión' : 'Redactar borrador'}
           </button>
         </>
       )}
@@ -51,7 +78,7 @@ function InformeIA({ solicitud, onRedactar }) {
       {texto && (
         <>
           <label className="campo-label" htmlFor="informe">
-            Borrador — edítalo libremente
+            Borrador — edítalo libremente antes de subirlo
           </label>
           <textarea
             id="informe"
@@ -65,10 +92,18 @@ function InformeIA({ solicitud, onRedactar }) {
             <button
               type="button"
               className="btn-descartar"
-              disabled={cargando}
+              disabled={cargando || subiendo}
               onClick={generar}
             >
               {cargando ? 'Redactando…' : 'Volver a redactar'}
+            </button>
+            <button
+              type="button"
+              className="btn btn-nuevo"
+              disabled={cargando || subiendo}
+              onClick={subir}
+            >
+              {subiendo ? 'Subiendo…' : 'Guardar en Drive'}
             </button>
           </div>
         </>

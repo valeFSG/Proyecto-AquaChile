@@ -68,6 +68,32 @@ export async function subirArchivo({ carpetaId, nombre, tipo, contenido }) {
   return data
 }
 
+// Sube el texto como documento de Google, no como archivo plano, para que la
+// psicóloga pueda seguir editándolo en Drive. Si ya existe uno con el mismo
+// nombre, reemplaza su contenido en vez de duplicarlo.
+export async function subirDocumento({ carpetaId, nombre, contenido }) {
+  const drive = conectar()
+  const existente = await buscarArchivo(nombre, carpetaId)
+  const media = { mimeType: 'text/plain', body: Readable.from(contenido) }
+
+  const { data } = existente
+    ? await drive.files.update({
+        fileId: existente,
+        media,
+        fields: 'id, name, webViewLink',
+      })
+    : await drive.files.create({
+        requestBody: {
+          name: nombre,
+          parents: [carpetaId],
+          mimeType: 'application/vnd.google-apps.document',
+        },
+        media,
+        fields: 'id, name, webViewLink',
+      })
+
+  return data
+}
 export function enlaceCarpeta(id) {
   return `https://drive.google.com/drive/folders/${id}`
 }

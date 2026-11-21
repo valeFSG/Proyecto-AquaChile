@@ -16,6 +16,7 @@ vi.mock('./servicios/google_drive.js', () => ({
   enlaceCarpeta: vi.fn(),
   renombrarCarpeta: vi.fn(),
   subirArchivo: vi.fn(),
+  subirDocumento: vi.fn(),
 }))
 vi.mock('./servicios/resend.js', () => ({
   correoActivo: () => false, avisarCandidato: vi.fn(), avisarReclutamiento: vi.fn(),
@@ -220,5 +221,52 @@ describe('PATCH /api/solicitudes/:id', () => {
     const guardadas = bd.actualizarSolicitud.mock.calls[0][1].competencias
     expect(guardadas[0]).toEqual({ competencia: 'Seguridad y prevención de riesgos', nivel: 'Destacado' })
     expect(guardadas[2].justificacion).toBe('Revisa poco su trabajo.')
+  })
+})
+
+describe('Informe en Drive', () => {
+  it('no deja subir el informe antes de realizar la entrevista', async () => {
+    bd.obtenerSolicitud.mockResolvedValue({
+      id: '1', etapa: 'Entrevista agendada', carpetaId: 'abc',
+    })
+
+    const res = await request(app)
+      .post('/api/solicitudes/1/informe/drive')
+      .set('Authorization', EVALUADOR)
+      .send({ texto: 'Informe de prueba.' })
+
+    expect(res.status).toBe(409)
+    expect(drive.subirDocumento).not.toHaveBeenCalled()
+  })
+
+  it('sube el informe y guarda el enlace', async () => {
+    bd.obtenerSolicitud.mockResolvedValue({
+      id: '1', etapa: 'Entrevista realizada', carpetaId: 'abc',
+      candidato: { nombre: 'Persona Ficticia' },
+    })
+    drive.subirDocumento.mockResolvedValue({
+      webViewLink: 'https://docs.google.com/document/d/xyz',
+    })
+    bd.guardarInformeUrl.mockResolvedValue({ id: '1', informeUrl: 'https://docs.google.com/document/d/xyz' })
+
+    const res = await request(app)
+      .post('/api/solicitudes/1/informe/drive')
+      .set('Authorization', EVALUADOR)
+      .send({ texto: 'Informe corregido por la profesional.' })
+
+    expect(res.status).toBe(200)
+    expect(drive.subirDocumento).toHaveBeenCalledWith(
+      expect.objectContaining({ carpetaId: 'abc', contenido: 'Informe corregido por la profesional.' }),
+    )
+    expect(bd.guardarInformeUrl).toHaveBeenCalledWith('1', 'https://docs.google.com/document/d/xyz')
+  })
+
+  it('rechaza al analista, que no registra evaluaciones', async () => {
+    const res = await request(app)
+      .post('/api/solicitudes/1/informe/drive')
+      .set('Authorization', ANALISTA)
+      .send({ texto: 'Informe de prueba.' })
+
+    expect(res.status).toBe(403)
   })
 })

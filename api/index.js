@@ -3,7 +3,7 @@ import cors from 'cors'
 import multer from 'multer'
 import {
   carpetaDeCandidato, copiarPlantillas, driveActivo, enlaceCarpeta,
-  renombrarCarpeta, subirArchivo,
+  renombrarCarpeta, subirArchivo, subirDocumento,
 } from './servicios/google_drive.js'
 import { PLANTILLAS } from './plantillas.js'
 import { limpiarCompetencias, validarCompetencias } from './competencias.js'
@@ -34,6 +34,8 @@ const ETAPAS = [
 
 const CATEGORIAS = ['Recomendado', 'Recomendado con observaciones', 'No recomendado']
 
+// Antes de la entrevista no hay nada que informar.
+const MINIMA_INFORME = ETAPAS.indexOf('Entrevista realizada')
 const ERROR_PDF = 'El CV debe ser un archivo PDF.'
 
 // El archivo se mantiene en memoria: va directo a Drive sin tocar el disco.
@@ -220,6 +222,9 @@ app.post('/api/solicitudes/:id/informe', permitir(ACCIONES.REGISTRAR_EVALUACION)
   if (!solicitud) {
     return res.status(404).json({ error: 'Solicitud no encontrada.' })
   }
+    if (ETAPAS.indexOf(solicitud.etapa) < MINIMA_INFORME) {
+      return res.status(409).json({ error: 'El informe se redacta una vez realizada la entrevista.' })
+  }
 
   try {
     res.json({ texto: await redactarInforme(solicitud) })
@@ -227,6 +232,36 @@ app.post('/api/solicitudes/:id/informe', permitir(ACCIONES.REGISTRAR_EVALUACION)
     res.status(502).json({ error: error.message })
   }
 })
+app.post('/api/solicitudes/:id/informe/drive', permitir(ACCIONES.REGISTRAR_EVALUACION), async (req, res) => {
+  const { texto } = req.body
+
+  if (!texto?.trim()) {
+    return res.status(400).json({ error: 'El informe viene vacío.' })
+  }
+
+  const solicitud = await bd.obtenerSolicitud(req.params.id)
+  if (!solicitud) {
+    return res.status(404).json({ error: 'Solicitud no encontrada.' })
+  }
+  if (ETAPAS.indexOf(solicitud.etapa) < MINIMA_INFORME) {
+    return res.status(409).json({ error: 'El informe se redacta una vez realizada la entrevista.' })
+  }
+  if (!solicitud.carpetaId) {
+    return res.status(409).json({ error: 'La solicitud todavía no tiene carpeta en Drive.' })
+  }
+
+  try {
+    const archivo = await subirDocumento({
+      carpetaId: solicitud.carpetaId,
+      nombre: `Informe psicolaboral - ${solicitud.candidato?.nombre ?? solicitud.id}`,
+      contenido: texto,
+    })
+    res.json(await bd.guardarInformeUrl(req.params.id, archivo.webViewLink))
+  } catch (error) {
+    res.status(502).json({ error: `No se pudo subir a Drive: ${error.message}` })
+  }
+})
+
 app.patch('/api/solicitudes/:id', permitirCambios, async (req, res) => {
   const { etapa, categoria, competencias, familiaCargo } = req.body
 

@@ -41,7 +41,9 @@ function aSolicitud(fila) {
     solicitud.carpetaId = fila.carpeta_id
     solicitud.carpetaUrl = fila.carpeta_url
   }
-    if (fila.fecha_entrevista) {
+      if (fila.informe_url) solicitud.informeUrl = fila.informe_url
+
+  if (fila.fecha_entrevista) {
     solicitud.fechaEntrevista = fila.fecha_entrevista
     solicitud.entrevistador = fila.entrevistador
     solicitud.eventoUrl = fila.evento_url
@@ -201,4 +203,13 @@ export async function usuarioPorCorreo(correo) {
   const fila = rows[0]
   if (!fila) return null
   return { id: fila.id, correo: fila.correo, nombre: fila.nombre, rol: fila.rol, claveHash: fila.clave_hash }
+}
+
+// Guarda el enlace del informe subido a Drive.
+export async function guardarInformeUrl(id, url) {
+  const { rows } = await pool.query(
+    `UPDATE solicitud SET informe_url = $2 WHERE id = $1 RETURNING id`,
+    [id, url],
+  )
+  return rows[0] ? obtenerSolicitud(id) : null
 }

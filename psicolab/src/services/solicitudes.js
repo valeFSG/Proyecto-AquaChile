@@ -42,3 +42,11 @@ export function redactarInforme(id) {
     'No se pudo redactar el informe.',
   )
 }
+
+export function subirInforme(id, texto) {
+  return pedir(
+    `/solicitudes/${id}/informe/drive`,
+    conJson('POST', { texto }),
+    'No se pudo subir el informe a Drive.',
+  )
+}

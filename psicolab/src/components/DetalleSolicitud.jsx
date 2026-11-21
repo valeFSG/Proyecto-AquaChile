@@ -13,7 +13,11 @@ const SIGUIENTE_ETAPA = {
   [ETAPAS.ENVIADA]: ETAPAS.JEFATURA,
   [ETAPAS.JEFATURA]: ETAPAS.CONTRATACION,
 }
+const ORDEN_ETAPAS = Object.values(ETAPAS)
 
+// El informe solo tiene sentido una vez realizada la entrevista.
+const puedeInformar = (etapa) =>
+  ORDEN_ETAPAS.indexOf(etapa) >= ORDEN_ETAPAS.indexOf(ETAPAS.REALIZADA)
 // La fecha llega como '2026-11-20 15:00:00'; se muestra sin los segundos.
 const fechaHora = (valor) => String(valor).slice(0, 16).replace(' ', ' · ')
 
@@ -23,6 +27,7 @@ function DetalleSolicitud({
   onAvanzar,
   onAgendar,
   onRedactarInforme,
+  onSubirInforme,
   onDescartar,
   onGuardarEvaluacion,
   onGuardarDatos,
@@ -489,8 +494,12 @@ function DetalleSolicitud({
         </div>
       )}
 
-      {puedeEvaluar && (
-        <InformeIA solicitud={solicitud} onRedactar={onRedactarInforme} />
+          {puedeEvaluar && puedeInformar(solicitud.etapa) && (
+        <InformeIA
+          solicitud={solicitud}
+          onRedactar={onRedactarInforme}
+          onSubir={onSubirInforme}
+        />
       )}
       <div className="bloque mb-4">
         <h2 className="bloque-titulo">Carpeta en Drive</h2>

@@ -5,6 +5,7 @@ import {
   actualizarSolicitud,
   agendarEntrevista,
   redactarInforme,
+  subirInforme,
 } from '../services/solicitudes'
 import { actualizarCandidato } from '../services/candidatos'
 import MetricaResumen from '../components/MetricaResumen'
@@ -82,6 +83,12 @@ function Dashboard() {
     reemplazar(actualizada)
     setSeleccionada(actualizada)
   }
+
+    async function guardarInforme(id, texto) {
+    const actualizada = await subirInforme(id, texto)
+    reemplazar(actualizada)
+    setSeleccionada(actualizada)
+  }
   async function descartar(id) {
     try {
       const actualizada = await actualizarSolicitud(id, { descartada: true })
@@ -115,6 +122,7 @@ function Dashboard() {
         onAvanzar={avanzar}
         onAgendar={agendar}
         onRedactarInforme={redactarInforme}
+        onSubirInforme={guardarInforme}
         onDescartar={descartar}
         onGuardarEvaluacion={guardarEvaluacion}
         onGuardarDatos={guardarDatos}
