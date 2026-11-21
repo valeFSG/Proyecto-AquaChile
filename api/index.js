@@ -12,6 +12,10 @@ import { calendarioActivo, crearEntrevista } from './servicios/google_calendar.j
 import { llmActivo } from './servicios/llm.js'
 import { redactarInforme } from './informe.js'
 import { bdConfigurada } from './bd/conexion.js'
+import { ACCIONES } from './permisos.js'
+import {
+  autenticar, firmarToken, permitir, permitirCambios, secretoTemporal, verificarClave,
+} from './seguridad.js'
 import * as bd from './bd/repositorio.js'
 
 const app = express()
@@ -42,11 +46,32 @@ const subida = multer({
   },
 })
 
+app.post('/api/login', async (req, res) => {
+  const { correo, clave } = req.body ?? {}
+  if (!correo || !clave) {
+    return res.status(400).json({ error: 'Ingresa tu correo y contraseña.' })
+  }
+
+  const usuario = await bd.usuarioPorCorreo(correo)
+  const valida = await verificarClave(clave, usuario?.claveHash)
+  if (!usuario || !valida) {
+    return res.status(401).json({ error: 'Correo o contraseña incorrectos.' })
+  }
+
+  res.json({
+    token: firmarToken(usuario),
+    usuario: { correo: usuario.correo, nombre: usuario.nombre, rol: usuario.rol },
+  })
+})
+
+// Todo lo que sigue exige una sesión válida.
+app.use('/api', autenticar)
+
 app.get('/api/candidatos', async (req, res) => {
   res.json(await bd.listarCandidatos())
 })
 
-app.patch('/api/candidatos/:id', async (req, res) => {
+app.patch('/api/candidatos/:id', permitir(ACCIONES.EDITAR_DATOS), async (req, res) => {
   const { correo, nombre } = req.body
 
   if (correo && !correo.includes('@')) {
@@ -75,7 +100,7 @@ app.get('/api/solicitudes', async (req, res) => {
   res.json(await bd.listarSolicitudes())
 })
 
-app.post('/api/solicitudes', async (req, res) => {
+app.post('/api/solicitudes', permitir(ACCIONES.CREAR_SOLICITUD), async (req, res) => {
   const {
     tipo, nombre, correo, familiaCargo, cargo, analista, nombreCv,
     areaActual, cargoActual,
@@ -125,7 +150,9 @@ app.post('/api/solicitudes', async (req, res) => {
   res.status(201).json(creada)
 })
 
-app.post('/api/solicitudes/:id/cv', subida.single('cv'), async (req, res) => {
+const permisoCv = permitir(ACCIONES.CREAR_SOLICITUD)
+
+app.post('/api/solicitudes/:id/cv', permisoCv, subida.single('cv'), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ error: 'Falta el archivo del CV.' })
   }
@@ -147,7 +174,7 @@ app.post('/api/solicitudes/:id/cv', subida.single('cv'), async (req, res) => {
 
   res.status(201).json({ nombre: archivo.name, enlace: archivo.webViewLink })
 })
-app.post('/api/solicitudes/:id/entrevista', async (req, res) => {
+app.post('/api/solicitudes/:id/entrevista', permitir(ACCIONES.MOVER_ETAPA), async (req, res) => {
   const { fecha, hora, duracionMin, entrevistador } = req.body
 
   if (!fecha || !hora || !entrevistador) {
@@ -184,7 +211,7 @@ app.post('/api/solicitudes/:id/entrevista', async (req, res) => {
   }))
 })
 
-app.post('/api/solicitudes/:id/informe', async (req, res) => {
+app.post('/api/solicitudes/:id/informe', permitir(ACCIONES.REGISTRAR_EVALUACION), async (req, res) => {
   if (!llmActivo()) {
     return res.status(503).json({ error: 'La redacción automática no está configurada.' })
   }
@@ -200,7 +227,7 @@ app.post('/api/solicitudes/:id/informe', async (req, res) => {
     res.status(502).json({ error: error.message })
   }
 })
-app.patch('/api/solicitudes/:id', async (req, res) => {
+app.patch('/api/solicitudes/:id', permitirCambios, async (req, res) => {
   const { etapa, categoria, competencias, familiaCargo } = req.body
 
   if (etapa && !ETAPAS.includes(etapa)) {
@@ -257,4 +284,7 @@ app.listen(3000, (error) => {
   }
   console.log('API escuchando en http://localhost:3000')
   console.log('Drive:', driveActivo() ? 'conectado' : 'apagado')
+  if (secretoTemporal()) {
+    console.warn('Falta JWT_SECRET en api/.env: las sesiones se cerrarán al reiniciar el API.')
+  }
 })

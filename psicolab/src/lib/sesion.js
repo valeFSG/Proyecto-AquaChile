@@ -17,20 +17,12 @@ const PERMISOS = {
   [ROLES.JEFATURA]: [],
 }
 
-// Usuarios ficticios para el login simulado.
-export const USUARIOS = [
-  { correo: 'analista@aquachile.demo', clave: 'analista123', nombre: 'Camila Rojas', rol: ROLES.ANALISTA },
-  { correo: 'evaluador@aquachile.demo', clave: 'evaluador123', nombre: 'Paula Herrera', rol: ROLES.EVALUADOR },
-  { correo: 'jefatura@aquachile.demo', clave: 'jefatura123', nombre: 'Andrés Muñoz', rol: ROLES.JEFATURA },
+// Cuentas ficticias de demostración. Las contraseñas viven solo en la base, como hash.
+export const CUENTAS_DEMO = [
+  { correo: 'analista@aquachile.demo', rol: ROLES.ANALISTA },
+  { correo: 'evaluador@aquachile.demo', rol: ROLES.EVALUADOR },
+  { correo: 'jefatura@aquachile.demo', rol: ROLES.JEFATURA },
 ]
-
-export function autenticar(correo, clave) {
-  const usuario = USUARIOS.find(
-    (u) => u.correo === correo.trim().toLowerCase() && u.clave === clave,
-  )
-  if (!usuario) return null
-  return { correo: usuario.correo, nombre: usuario.nombre, rol: usuario.rol }
-}
 
 export function puede(rol, accion) {
   return PERMISOS[rol]?.includes(accion) ?? false

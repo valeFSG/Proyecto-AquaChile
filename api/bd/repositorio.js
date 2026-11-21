@@ -192,3 +192,13 @@ export async function agendarEntrevista(id, datos) {
 
   return rows[0] ? obtenerSolicitud(id) : null
 }
+
+export async function usuarioPorCorreo(correo) {
+  const { rows } = await pool.query(
+    'SELECT * FROM usuario WHERE lower(correo) = lower($1)',
+    [correo.trim()],
+  )
+  const fila = rows[0]
+  if (!fila) return null
+  return { id: fila.id, correo: fila.correo, nombre: fila.nombre, rol: fila.rol, claveHash: fila.clave_hash }
+}

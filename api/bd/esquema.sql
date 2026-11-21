@@ -1,9 +1,20 @@
 -- Esquema de la base de datos del sistema psicolaboral.
 -- Todos los datos de ejemplo son ficticios.
 
+DROP TABLE IF EXISTS usuario;
 DROP TABLE IF EXISTS evaluacion;
 DROP TABLE IF EXISTS solicitud;
 DROP TABLE IF EXISTS candidato;
+
+-- Usuarios del sistema. La contraseña se guarda solo como hash bcrypt.
+CREATE TABLE usuario (
+  id         SERIAL PRIMARY KEY,
+  correo     TEXT NOT NULL UNIQUE,
+  nombre     TEXT NOT NULL,
+  rol        TEXT NOT NULL CHECK (rol IN (
+               'Analista de Reclutamiento', 'Profesional Evaluador', 'Jefatura')),
+  clave_hash TEXT NOT NULL
+);
 
 CREATE TABLE candidato (
   id               TEXT PRIMARY KEY DEFAULT gen_random_uuid()::text,
@@ -45,6 +56,14 @@ CREATE TABLE evaluacion (
   observaciones TEXT NOT NULL DEFAULT '',
   competencias  JSONB NOT NULL DEFAULT '[]' CHECK (jsonb_typeof(competencias) = 'array')
 );
+
+INSERT INTO usuario (correo, nombre, rol, clave_hash) VALUES
+  ('analista@aquachile.demo', 'Camila Rojas', 'Analista de Reclutamiento',
+   '$2b$10$VaoxuGLr.O3/4tMgX9oOa.TJV/JhF8IxfKPonMaZSo3jv4aDhpLPi'),
+  ('evaluador@aquachile.demo', 'Paula Herrera', 'Profesional Evaluador',
+   '$2b$10$WnPDMLomxavbpTu1vN137uGeEgf2zTDXWk.FIj3Th0Z3oho35OzJe'),
+  ('jefatura@aquachile.demo', 'Andrés Muñoz', 'Jefatura',
+   '$2b$10$85zVxDA2ttoaKIlHDelvAe5fk/BdybgLT6e.VxVDqo2UPm60odHLW');
 
 INSERT INTO candidato (id, nombre, correo, telefono, tipo, area_actual, cargo_actual, antiguedad_anios) VALUES
   ('c1', 'María Fernanda Soto', 'maria.soto@correo.cl', '+56 9 8412 7730', 'Externo', NULL, NULL, NULL),

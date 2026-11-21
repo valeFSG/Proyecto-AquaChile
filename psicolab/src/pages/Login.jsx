@@ -1,35 +1,44 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { useSesion } from '../context/sesion'
-import { USUARIOS } from '../lib/sesion'
+import { CUENTAS_DEMO } from '../lib/sesion'
 import logo from '../assets/logo-aquachile-blanco.png'
 
 function Login() {
-  const { usuario, iniciarSesion } = useSesion()
+  const { usuario, aviso, iniciarSesion } = useSesion()
   const navigate = useNavigate()
+  const campoClave = useRef(null)
   const [correo, setCorreo] = useState('')
   const [clave, setClave] = useState('')
   const [error, setError] = useState(null)
+  const [enviando, setEnviando] = useState(false)
 
   if (usuario) return <Navigate to="/" replace />
 
-  function enviar(evento) {
+  async function enviar(evento) {
     evento.preventDefault()
     if (!correo.trim() || !clave) {
       setError('Ingresa tu correo y contraseña.')
       return
     }
-    if (!iniciarSesion(correo, clave)) {
-      setError('Correo o contraseña incorrectos.')
-      return
+
+    setError(null)
+    setEnviando(true)
+    try {
+      await iniciarSesion(correo, clave)
+      navigate('/', { replace: true })
+    } catch (err) {
+      setError(err.message)
+    } finally {
+      setEnviando(false)
     }
-    navigate('/', { replace: true })
   }
 
   function usarDemo(demo) {
     setCorreo(demo.correo)
-    setClave(demo.clave)
+    setClave('')
     setError(null)
+    campoClave.current?.focus()
   }
 
   return (
@@ -45,6 +54,8 @@ function Login() {
         <h1 className="titulo mb-1">Iniciar sesión</h1>
         <p className="subtitulo mb-4">Acceso exclusivo del equipo de reclutamiento.</p>
 
+        {aviso && <span className="campo-error d-block mb-3">{aviso}</span>}
+
         <label className="campo-label" htmlFor="correo">Correo</label>
         <input
           id="correo" type="email" className="campo-input mb-3"
@@ -54,17 +65,19 @@ function Login() {
 
         <label className="campo-label" htmlFor="clave">Contraseña</label>
         <input
-          id="clave" type="password" className="campo-input"
+          id="clave" type="password" className="campo-input" ref={campoClave}
           value={clave} onChange={(e) => setClave(e.target.value)}
         />
 
         {error && <span className="campo-error d-block mt-2">{error}</span>}
 
-        <button type="submit" className="btn btn-nuevo w-100 mt-4">Ingresar</button>
+        <button type="submit" className="btn btn-nuevo w-100 mt-4" disabled={enviando}>
+          {enviando ? 'Ingresando…' : 'Ingresar'}
+        </button>
 
         <div className="login-demo">
           <span className="dato-label d-block mb-2">Cuentas de prueba</span>
-          {USUARIOS.map((demo) => (
+          {CUENTAS_DEMO.map((demo) => (
             <button
               key={demo.correo}
               type="button"
