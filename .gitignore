@@ -4,3 +4,4 @@ dist/
 *.db
 credenciales-drive.json
 aquachile-psicolaboral-*.json
+coverage/
