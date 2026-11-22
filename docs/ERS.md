@@ -7,8 +7,8 @@
 | Contraparte | AquaChile — Área de Reclutamiento y Selección |
 | Asignatura | DSY1104 Desarrollo Full Stack II — Vinculación con el Medio |
 | Equipo | Valentina Santana · Nicol González |
-| Versión | 1.0 — 27 de octubre de 2026 |
-| Estado | Entrega Evaluación Parcial 2 (Hito 1 — Frontend funcional) |
+| Versión | 2.0 — 21 de noviembre de 2026 |
+| Estado | Hito 2 — Integración con backend, base de datos y servicios externos |
 
 ---
 
@@ -32,17 +32,23 @@ preparación documental asociada a cada proceso.
 
 ## 3. Alcance de esta entrega
 
-Esta versión corresponde al **Hito 1 — Frontend funcional** definido en la carta
-Gantt del anexo de requerimiento. La integración con backend y base de datos
-corresponde al Hito 2 (23 al 28 de noviembre) y el despliegue al Hito 3 (30 de
-noviembre al 5 de diciembre).
+Esta versión corresponde al **Hito 2** de la carta Gantt del anexo: frontend en
+React integrado con una API REST propia, persistencia en base de datos
+PostgreSQL, autenticación real por rol y pruebas automatizadas en ambas capas.
+
+Sobre ese alcance mínimo se incorporaron cuatro integraciones con servicios
+externos —Google Drive, Google Calendar, correo transaccional y un modelo de
+lenguaje— descritas en la sección 6.
+
+El despliegue en un servicio gratuito corresponde al Hito 3 (30 de noviembre al
+5 de diciembre).
 
 ## 4. Usuarios del sistema
 
 | Rol | Responsabilidad | Permisos implementados |
 |---|---|---|
 | Analista de Reclutamiento | Registra candidatos y genera solicitudes de evaluación | Crear solicitud, editar datos, mover etapa |
-| Profesional Evaluador | Revisa antecedentes y registra el resultado de la evaluación | Mover etapa, registrar evaluación |
+| Profesional Evaluador | Revisa antecedentes, registra la evaluación y elabora el informe | Mover etapa, registrar evaluación, redactar y subir el informe |
 | Jefatura | Consulta el estado del proceso | Solo lectura |
 
 La autenticación es real: los usuarios se guardan en la base con la contraseña
@@ -89,8 +95,11 @@ incorporaron por su aporte directo a la problemática levantada.
 | Creación automática de la carpeta del candidato en Google Drive | Elimina la tarea manual descrita en la problemática |
 | Carga del currículum a la carpeta del candidato | Elimina la descarga y copia manual del archivo |
 | Copia automática de las plantillas según la familia del cargo | Elimina la selección y copia manual de los documentos de trabajo |
+| Agendamiento de la entrevista con evento en Google Calendar | Registra la entrevista en el calendario con los antecedentes y el enlace a la carpeta del candidato, evitando coordinar por fuera del sistema |
+| Notificación automática por correo al ingresar una solicitud | El candidato recibe confirmación y el área de reclutamiento queda avisada sin que nadie escriba el correo a mano |
+| Redacción asistida del informe psicolaboral con inteligencia artificial | A partir de las notas de entrevista y los niveles por competencia registrados por la profesional, el sistema redacta un borrador que ella revisa y corrige en pantalla antes de subirlo como documento editable a la carpeta del candidato |
 | Vista de Informes con filtro por resultado | Entrega a Jefatura una consulta propia del estado de las evaluaciones cerradas |
-| Persistencia en base de datos PostgreSQL | Adelanto del Hito 2 |
+| Persistencia en base de datos PostgreSQL | Alcance del Hito 2 |
 
 ## 7. Desviaciones respecto del anexo
 
@@ -122,6 +131,27 @@ Los niveles por competencia y sus justificaciones se guardan dentro de la
 entidad Evaluación (columna JSONB `competencias`), para mantener las tres
 entidades que pide el anexo.
 
+El anexo no define un catálogo de competencias. Las cinco competencias por
+familia de cargo fueron definidas por el equipo a partir del tipo de funciones
+de cada familia, y son sustituibles si la contraparte entrega las suyas. Están
+declaradas en un solo lugar por capa: `api/competencias.js` y
+`psicolab/src/data/competencias.js`.
+
+### Uso de inteligencia artificial en el informe
+
+El anexo no contempla el uso de modelos de lenguaje. Se incorporó como apoyo a
+la redacción del informe, con tres resguardos:
+
+1. El modelo solo recibe lo que la profesional registró, y tiene prohibido
+   inventar antecedentes, pruebas aplicadas o puntajes.
+2. Los niveles por competencia los asigna ella; el modelo los comenta pero no
+   puede modificarlos ni reinterpretarlos.
+3. Ningún documento llega a la carpeta del candidato sin que ella lo revise y
+   lo apruebe en pantalla.
+
+Cada informe generado incluye al cierre una nota que declara su origen y la
+necesidad de validación profesional.
+
 ### Datos de prueba
 
 Todos los datos de candidatos, currículums y plantillas son ficticios, conforme
@@ -131,18 +161,24 @@ a la restricción del caso.
 
 | Pendiente | Etapa prevista |
 |---|---|
-| Alta independiente de candidato (RF-01 completo) | Hito 2 |
+| Alta independiente de candidato (RF-01 completo) | Hito 3 |
 | Despliegue en servicio gratuito | Hito 3 — 30 de noviembre al 5 de diciembre |
-| Generación automática del informe de evaluación | Fuera del alcance obligatorio (anexo, sección 13) |
 | Asistente de entrevista | Fuera del alcance obligatorio (anexo, sección 13) |
 
 ## 9. Arquitectura
 
 React + Bootstrap 5 → API REST (Node.js + Express) → PostgreSQL, con
-integración a Google Drive API desde el backend.
+integraciones a Google Drive, Google Calendar, un servicio de correo
+transaccional y un modelo de lenguaje, todas invocadas desde el backend.
 
 Aplicación monolítica, conforme a la sección 11 del anexo. No se implementan
 microservicios ni infraestructura distribuida.
+
+Cada integración externa está aislada en su propio módulo dentro de
+`api/servicios/` y envuelta en manejo de errores: si una falla, la operación
+principal se completa igual y el fallo queda registrado en consola. Cada módulo
+expone además una función que verifica si sus credenciales existen, de modo que
+el sistema arranca y opera sin ninguna de ellas.
 
 | Componente | Tecnología |
 |---|---|
@@ -151,7 +187,10 @@ microservicios ni infraestructura distribuida.
 | Base de datos | PostgreSQL |
 | Seguridad | Contraseñas con bcrypt, sesiones con JWT |
 | Pruebas | Vitest + React Testing Library (frontend), Vitest + Supertest (API) |
-| Automatización documental | Google Drive API mediante OAuth |
+| Automatización documental | Google Drive API mediante OAuth 2.0 |
+| Agendamiento | Google Calendar API mediante OAuth 2.0 |
+| Correo transaccional | Resend |
+| Redacción asistida | Modelo de lenguaje Gemini vía API REST |
 
 ## 10. Modelo de datos
 
@@ -161,15 +200,16 @@ usuarios para la autenticación.
 | Entidad | Atributos principales |
 |---|---|
 | Candidato | Nombre, correo, teléfono, tipo, área y cargo actual, antigüedad |
-| Solicitud | Candidato asociado, cargo, familia de cargo, analista, CV, etapa, fecha, carpeta en Drive |
+| Solicitud | Candidato asociado, cargo, familia de cargo, analista, CV, etapa, fecha, carpeta en Drive, fecha y entrevistador de la entrevista, evento de calendario, informe en Drive |
 | Evaluación | Solicitud asociada, fecha, categoría del resultado, notas de la entrevista (columna `observaciones`), competencias con su nivel y justificación |
 | Usuario (soporte) | Correo, nombre, rol, hash de la contraseña |
 
 ## 11. Flujo principal
 
 Registro de candidato → Creación de solicitud → Preparación automática de la
-carpeta → Gestión de la evaluación → Actualización de estado → Consulta de
-información.
+carpeta y aviso por correo → Agendamiento de la entrevista con evento en
+calendario → Registro de la evaluación por competencias → Redacción, revisión y
+publicación del informe → Actualización de estado → Consulta de información.
 
 Este flujo es demostrable de principio a fin en la versión actual.
 
@@ -182,7 +222,9 @@ Este flujo es demostrable de principio a fin en la versión actual.
 | Creación manual de la carpeta del candidato | Carpeta generada automáticamente al registrar la solicitud |
 | Descarga y copia manual del currículum | CV cargado automáticamente en la carpeta |
 | Copia manual de plantillas según el cargo | Informe y pauta copiados según la familia del cargo |
-| Traspaso manual al informe final | Pendiente: corresponde a una etapa posterior |
+| Coordinación de la entrevista por fuera del sistema | Evento creado en Google Calendar al agendar, con los antecedentes y el enlace a la carpeta |
+| Avisos manuales al candidato y a reclutamiento | Correos enviados automáticamente al ingresar la solicitud |
+| Traspaso manual al informe final | Borrador redactado desde las notas y los niveles por competencia, revisado por la profesional y publicado en la carpeta del candidato |
 
 ## 13. Restricciones
 
@@ -193,3 +235,5 @@ Este flujo es demostrable de principio a fin en la versión actual.
   herramienta oficial de reclutamiento de la empresa.
 - El proyecto se desarrolla exclusivamente con herramientas gratuitas, sin
   contratación de servicios ni licencias.
+- Ninguna credencial de los servicios externos se versiona en el repositorio.
+  Las variables de entorno se documentan vacías en `api/.env.example`.
