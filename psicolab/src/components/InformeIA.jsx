@@ -2,6 +2,7 @@ import { useState } from 'react'
 
 function InformeIA({ solicitud, onRedactar, onSubir }) {
   const [texto, setTexto] = useState('')
+  const [hayBorrador, setHayBorrador] = useState(false)
   const [error, setError] = useState(null)
   const [cargando, setCargando] = useState(false)
   const [subiendo, setSubiendo] = useState(false)
@@ -14,6 +15,7 @@ function InformeIA({ solicitud, onRedactar, onSubir }) {
     try {
       const { texto: borrador } = await onRedactar(solicitud.id)
       setTexto(borrador)
+      setHayBorrador(true)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -27,6 +29,7 @@ function InformeIA({ solicitud, onRedactar, onSubir }) {
     try {
       await onSubir(solicitud.id, texto)
       setTexto('')
+      setHayBorrador(false)
     } catch (err) {
       setError(err.message)
     } finally {
@@ -58,7 +61,7 @@ function InformeIA({ solicitud, onRedactar, onSubir }) {
         </p>
       )}
 
-      {hayNotas && !texto && (
+      {hayNotas && !hayBorrador && (
         <>
           <p className="campo-ayuda">
             Redacta un borrador a partir de las observaciones guardadas. Revísalo
@@ -75,7 +78,7 @@ function InformeIA({ solicitud, onRedactar, onSubir }) {
         </>
       )}
 
-      {texto && (
+      {hayBorrador && (
         <>
           <label className="campo-label" htmlFor="informe">
             Borrador — edítalo libremente antes de subirlo
@@ -100,7 +103,7 @@ function InformeIA({ solicitud, onRedactar, onSubir }) {
             <button
               type="button"
               className="btn btn-nuevo"
-              disabled={cargando || subiendo}
+              disabled={cargando || subiendo || !texto.trim()}
               onClick={subir}
             >
               {subiendo ? 'Subiendo…' : 'Guardar en Drive'}
