@@ -20,10 +20,10 @@ qué quedó deliberadamente fuera.
 | Runner | Vitest | Vitest |
 | Librería de pruebas | React Testing Library | Supertest |
 | Entorno | jsdom | Node |
-| Configuración | `psicolab/vite.config.js` | `api/package.json` |
+| Configuración | `psicolab/vite.config.js` | `api/vitest.config.js` |
 | Archivo de setup | `psicolab/src/test/setup.js` | — |
 | Comando | `npx vitest run` | `npm test` |
-| Cobertura | `npm run coverage` | — |
+| Cobertura | `npm run coverage` | `npm run coverage` |
 
 El setup de frontend carga `@testing-library/jest-dom`, que agrega los
 matchers de DOM (`toBeInTheDocument`, `toHaveAttribute`).
@@ -95,7 +95,8 @@ const onSubir = vi.fn().mockRejectedValue(new Error('La solicitud no tiene carpe
 ```
 
 **Backend.** Ninguna prueba sale a internet ni a la base de datos. Se simulan
-con `vi.mock` el repositorio, Google Drive, Resend y el servicio de IA. Las
+con `vi.mock` el repositorio, Google Drive, Google Calendar, Resend, el servicio
+de IA y el armado del informe (`informe.js`). Las
 pruebas verifican el comportamiento del API, no el de los servicios externos.
 
 ## 6. Resultados
@@ -131,6 +132,28 @@ ejercitan. Las páginas y los módulos de datos no aparecen en el informe porque
 ninguna prueba los importa, de acuerdo con el criterio de alcance de la
 sección 3.
 
+### Cobertura del API
+
+```
+Statements   62.56%
+Branches     52.70%
+Functions    70.96%
+Lines        63.35%
+```
+
+| Archivo | Statements | Branches |
+|---|---|---|
+| `permisos.js` | 100% | 50% |
+| `seguridad.js` | 96.42% | 81.25% |
+| `competencias.js` | 81.81% | 76.47% |
+| `index.js` | 52.34% | 45.13% |
+
+**Nota metodológica:** se midió solo sobre los módulos con lógica propia del API
+(endpoints, seguridad, permisos y validación de competencias), definidos en
+`api/vitest.config.js`. El repositorio de base de datos y los servicios
+externos no se incluyen porque en las pruebas van simulados: medirlos daría 0%
+sin aportar información.
+
 ## 7. Brechas conocidas
 
 - **`DetalleSolicitud.jsx` (60%)** es el componente más grande del proyecto y
@@ -142,6 +165,11 @@ sección 3.
 - **`carpeta.js` y `FichaCandidato.jsx`** muestran 50% de ramas pese a tener
   100% de líneas: son ramas de valores opcionales que no cambian el resultado
   visible.
+- **`api/index.js` (52%)** tiene sin probar la subida del CV, el agendamiento
+  de la entrevista, la generación del informe con IA, los listados (GET), el
+  renombrado de la carpeta al cambiar el nombre del candidato y el manejador de
+  errores (respuestas 409 y 500). Lo cubierto son las reglas de negocio:
+  validaciones, permisos y la justificación de las competencias.
 
 ## 8. Hallazgos de las pruebas
 
@@ -164,4 +192,5 @@ npm run coverage
 cd api
 npm install
 npm test
+npm run coverage
 ```
