@@ -143,3 +143,78 @@ describe('DetalleSolicitud · competencias', () => {
     expect(datos.competencias[0]).toMatchObject({ competencia: primera, nivel: 'Destacado' })
   })
 })
+
+describe('DetalleSolicitud · edición de datos', () => {
+  const abrirEdicion = async (props) => {
+    renderizar(props)
+    await userEvent.click(screen.getByRole('button', { name: 'Editar' }))
+  }
+
+  it('no muestra el botón Editar a quien no puede editar', () => {
+    renderizar({ puedeEditar: false })
+    expect(screen.queryByRole('button', { name: 'Editar' })).not.toBeInTheDocument()
+  })
+
+  it('valida el nombre y el correo antes de guardar', async () => {
+    const onGuardarDatos = vi.fn()
+    await abrirEdicion({ onGuardarDatos })
+
+    await userEvent.clear(screen.getByLabelText('Nombre completo'))
+    await userEvent.click(screen.getByRole('button', { name: 'Guardar cambios' }))
+    expect(screen.getByText('El nombre es obligatorio.')).toBeInTheDocument()
+
+    await userEvent.type(screen.getByLabelText('Nombre completo'), 'Persona Ficticia')
+    await userEvent.clear(screen.getByLabelText('Correo'))
+    await userEvent.type(screen.getByLabelText('Correo'), 'sin-arroba')
+    await userEvent.click(screen.getByRole('button', { name: 'Guardar cambios' }))
+    expect(screen.getByText('El correo no es válido.')).toBeInTheDocument()
+
+    expect(onGuardarDatos).not.toHaveBeenCalled()
+  })
+
+  it('guarda los datos del candidato y de la solicitud por separado', async () => {
+    const onGuardarDatos = vi.fn().mockResolvedValue()
+    await abrirEdicion({ onGuardarDatos })
+
+    await userEvent.clear(screen.getByLabelText('Cargo al que postula'))
+    await userEvent.type(screen.getByLabelText('Cargo al que postula'), 'Operario de Proceso')
+    await userEvent.click(screen.getByRole('button', { name: 'Guardar cambios' }))
+
+    const [datosCandidato, datosSolicitud] = onGuardarDatos.mock.calls[0]
+    expect(datosCandidato).toEqual({
+      nombre: 'María Fernanda Soto', correo: 'maria.soto@correo.cl', telefono: '+56 9 8412 7730',
+    })
+    expect(datosSolicitud.cargo).toBe('Operario de Proceso')
+    expect(await screen.findByText('Datos actualizados.')).toBeInTheDocument()
+  })
+
+  it('envía área, cargo y antigüedad cuando el candidato es interno', async () => {
+    const onGuardarDatos = vi.fn().mockResolvedValue()
+    const interna = { ...solicitudesIniciales[1], candidato: candidatosIniciales[1] }
+    await abrirEdicion({ solicitud: interna, onGuardarDatos })
+
+    await userEvent.clear(screen.getByLabelText('Antigüedad'))
+    await userEvent.type(screen.getByLabelText('Antigüedad'), '6')
+    await userEvent.click(screen.getByRole('button', { name: 'Guardar cambios' }))
+
+    expect(onGuardarDatos.mock.calls[0][0]).toMatchObject({
+      areaActual: 'Bodega', cargoActual: 'Auxiliar de Bodega', antiguedadAnios: 6,
+    })
+  })
+
+  it('muestra el error del servidor y mantiene el formulario abierto', async () => {
+    const onGuardarDatos = vi.fn().mockRejectedValue(new Error('Ya existe un candidato con ese correo.'))
+    await abrirEdicion({ onGuardarDatos })
+
+    await userEvent.click(screen.getByRole('button', { name: 'Guardar cambios' }))
+
+    expect(await screen.findByText('Ya existe un candidato con ese correo.')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Guardar cambios' })).toBeInTheDocument()
+  })
+
+  it('vuelve a la vista de datos al cancelar', async () => {
+    await abrirEdicion()
+    await userEvent.click(screen.getByRole('button', { name: 'Cancelar' }))
+    expect(screen.getByRole('button', { name: 'Editar' })).toBeInTheDocument()
+  })
+})

@@ -155,7 +155,7 @@ La API valida el token y el permiso del rol en cada endpoint: sin token responde
 
 ## Pruebas
 
-El proyecto tiene **47 pruebas automatizadas**: 26 en el frontend y 21 en la API.
+El proyecto tiene **53 pruebas automatizadas**: 32 en el frontend y 21 en la API.
 El alcance, el uso de mocks y la cobertura por archivo están documentados en
 [`docs/COBERTURA.md`](docs/COBERTURA.md).
 

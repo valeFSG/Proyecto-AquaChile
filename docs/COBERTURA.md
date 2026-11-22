@@ -61,14 +61,14 @@ lógica propia, y los módulos de datos estáticos (`data/`).
 
 ## 4. Inventario de pruebas
 
-### Frontend — 26 pruebas en 6 archivos
+### Frontend — 32 pruebas en 6 archivos
 
 | Archivo | Pruebas | Qué verifica |
 |---|---|---|
 | `lib/carpeta.test.js` | 4 | Normalización de nombres a minúsculas sin tildes y armado de la carpeta con el CV y las plantillas de la familia |
 | `components/FichaCandidato.test.jsx` | 2 | Render del candidato, cargo y tipo; y que el clic propague `onAbrir` |
 | `components/FormularioSolicitud.test.jsx` | 4 | Errores al enviar vacío, que no llame a `onCrear` con errores, el envío válido, y los campos condicionales del movimiento interno |
-| `components/DetalleSolicitud.test.jsx` | 8 | Estado sin carpeta, enlace a Drive, enlace al evento, formulario de entrevista antes de agendar, avance directo en otras etapas, descarte, y la justificación obligatoria de los niveles negativos |
+| `components/DetalleSolicitud.test.jsx` | 14 | Estado sin carpeta, enlace a Drive, enlace al evento, formulario de entrevista antes de agendar, avance directo en otras etapas, descarte, la justificación obligatoria de los niveles negativos, y la edición de datos: botón oculto sin permiso, validaciones, guardado separado de candidato y solicitud, datos del movimiento interno, error del servidor y cancelación |
 | `components/InformeIA.test.jsx` | 6 | Estado sin notas, borrador editable, que suba el texto corregido y no el original, los dos caminos de error, y el enlace al informe ya subido |
 | `services/peticion.test.js` | 2 | Que el token viaje en el encabezado `Authorization` y que un 401 cierre la sesión |
 
@@ -102,18 +102,18 @@ pruebas verifican el comportamiento del API, no el de los servicios externos.
 ## 6. Resultados
 
 ```
-Frontend   26 pruebas · 6 archivos · todas pasan
+Frontend   32 pruebas · 6 archivos · todas pasan
 Backend    21 pruebas · 1 archivo  · todas pasan
-Total      47 pruebas
+Total      53 pruebas
 ```
 
 ### Cobertura del frontend
 
 ```
-Statements   77.23%  (188/243)
-Branches     69.72%
-Functions    81.96%
-Lines        77.23%
+Statements   89.43%  (220/246)
+Branches     80.73%
+Functions    91.80%
+Lines        90.17%
 ```
 
 | Archivo | Statements | Branches |
@@ -121,11 +121,11 @@ Lines        77.23%
 | `InformeIA.jsx` | 100% | 95.83% |
 | `carpeta.js` | 100% | 50% |
 | `FichaCandidato.jsx` | 100% | 50% |
+| `DetalleSolicitud.jsx` | 88.57% | 83.16% |
 | `FormularioSolicitud.jsx` | 88.46% | 81.03% |
 | `peticion.js` | 87.50% | 72.72% |
 | `almacenSesion.js` | 85.71% | 100% |
 | `FormularioEntrevista.jsx` | 76.19% | 70% |
-| `DetalleSolicitud.jsx` | 60.00% | 59.40% |
 
 **Nota metodológica:** la cobertura se reporta sobre los módulos que las pruebas
 ejercitan. Las páginas y los módulos de datos no aparecen en el informe porque
@@ -156,10 +156,12 @@ sin aportar información.
 
 ## 7. Brechas conocidas
 
-- **`DetalleSolicitud.jsx` (60%)** es el componente más grande del proyecto y
+- **`DetalleSolicitud.jsx` (88.6%)** es el componente más grande del proyecto y
   concentra la ficha completa: edición de datos, evaluación por competencias,
-  entrevista e informe. Las ramas sin cubrir corresponden principalmente al
-  modo de edición de los datos del candidato.
+  entrevista e informe. Subió desde 60% al agregar seis pruebas del modo de
+  edición de datos. Lo que queda sin cubrir son mensajes de validación
+  secundarios (cargo vacío, evaluación sin categoría, fecha o nivel) y el error
+  del servidor al guardar la evaluación.
 - **`FormularioEntrevista.jsx` (76%)** tiene sin cubrir algunas ramas de
   validación de campos vacíos.
 - **`carpeta.js` y `FichaCandidato.jsx`** muestran 50% de ramas pese a tener
