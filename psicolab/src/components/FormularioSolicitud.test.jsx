@@ -62,4 +62,28 @@ describe('FormularioSolicitud', () => {
     expect(screen.getByLabelText('Área actual')).toBeInTheDocument()
     expect(screen.getByLabelText('Cargo actual')).toBeInTheDocument()
   })
+  
+  it('arma el correo del candidato a partir de su nombre', async () => {
+    vi.stubEnv('VITE_DOMINIO_DEMO', 'correo-ficticio.cl')
+    render(<FormularioSolicitud onCrear={vi.fn()} onCancelar={vi.fn()} />)
+
+    await userEvent.type(screen.getByLabelText('Nombre completo'), 'Matías Fuentealba')
+
+    expect(screen.getByLabelText('Correo electrónico')).toHaveValue(
+      'matias.fuentealba@correo-ficticio.cl',
+    )
+    vi.unstubAllEnvs()
+  })
+
+  it('deja de seguir al nombre si el correo se escribe a mano', async () => {
+    vi.stubEnv('VITE_DOMINIO_DEMO', 'correo-ficticio.cl')
+    render(<FormularioSolicitud onCrear={vi.fn()} onCancelar={vi.fn()} />)
+
+    const correo = screen.getByLabelText('Correo electrónico')
+    await userEvent.type(correo, 'otro@correo.cl')
+    await userEvent.type(screen.getByLabelText('Nombre completo'), 'Matías Fuentealba')
+
+    expect(correo).toHaveValue('otro@correo.cl')
+    vi.unstubAllEnvs()
+  })
 })

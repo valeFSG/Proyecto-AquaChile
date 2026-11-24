@@ -2,14 +2,27 @@ import { useState } from 'react'
 import { FAMILIAS } from '../data/catalogo'
 import { TIPOS } from '../data/solicitudes'
 
-// En la demostración el correo viene relleno: Resend solo entrega a la
-// dirección dueña de la cuenta, así que escribirlo cada vez es perder tiempo.
-// Se configura en psicolab/.env y queda vacío si no existe.
-const CORREO_DEMO = import.meta.env.VITE_CORREO_DEMO ?? ''
+// En la demostración el correo se arma solo a partir del nombre. El sistema
+// identifica a las personas por su correo, así que repetirlo haría que todas
+// las solicitudes cayeran en la misma ficha. Se configura en psicolab/.env y
+// queda desactivado si no existe.
+function correoDesdeNombre(nombre) {
+  const dominio = import.meta.env.VITE_DOMINIO_DEMO ?? ''
+  if (!dominio) return ''
+  const limpio = nombre
+    .trim()
+    .toLowerCase()
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9 ]/g, '')
+    .replace(/ +/g, '.')
+  return limpio ? `${limpio}@${dominio}` : ''
+}
+
 const VALORES_INICIALES = {
   tipo: TIPOS.EXTERNO,
   nombre: '',
-  correo: CORREO_DEMO,
+  correo: '',
   telefono: '',
   familiaCargo: '',
   cargo: '',
@@ -22,14 +35,25 @@ const VALORES_INICIALES = {
 function FormularioSolicitud({ onCrear, onCancelar }) {
   const [valores, setValores] = useState(VALORES_INICIALES)
   const [cv, setCv] = useState(null)
+  const [correoManual, setCorreoManual] = useState(false)
   const [errores, setErrores] = useState({})
   const [guardando, setGuardando] = useState(false)
 
   const esInterno = valores.tipo === TIPOS.INTERNO
 
+    // Mientras no se escriba el correo a mano, sigue al nombre.
   function cambiar(evento) {
     const { name, value } = evento.target
-    setValores((previos) => ({ ...previos, [name]: value }))
+
+    if (name === 'correo') setCorreoManual(true)
+
+    setValores((previos) => ({
+      ...previos,
+      [name]: value,
+      ...(name === 'nombre' && !correoManual
+        ? { correo: correoDesdeNombre(value) }
+        : {}),
+    }))
   }
 
   function validar() {
