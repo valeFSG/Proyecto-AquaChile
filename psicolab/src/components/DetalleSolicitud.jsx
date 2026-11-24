@@ -2,6 +2,7 @@ import { useState } from 'react'
 import FormularioEntrevista from './FormularioEntrevista'
 import InformeIA from './InformeIA'
 import { planificarCarpeta } from '../lib/carpeta'
+import { valorar } from '../lib/valoracion'
 import { ETAPAS, TIPOS, CATEGORIAS } from '../data/solicitudes'
 import { FAMILIAS, cargosDe } from '../data/catalogo'
 import { COMPETENCIAS, NIVELES, NIVELES_NEGATIVOS } from '../data/competencias'
@@ -60,6 +61,7 @@ function DetalleSolicitud({
   const candidato = solicitud.candidato
   const esInterno = candidato?.tipo === TIPOS.INTERNO
   const siguiente = SIGUIENTE_ETAPA[solicitud.etapa]
+  const valoracion = valorar(solicitud.competencias)
 
   function cambiarEval(evento) {
     const { name, value } = evento.target
@@ -385,6 +387,25 @@ function DetalleSolicitud({
         </>
       )}
 
+      {valoracion && (
+        <div className="bloque mb-4">
+          <h2 className="bloque-titulo">Resultado de la evaluación</h2>
+
+          <div className="d-flex align-items-baseline gap-3 mb-3">
+            <span className="valoracion-cifra">{valoracion.porcentaje}%</span>
+            <span className="dato-valor">{solicitud.categoria ?? 'Sin categoría asignada'}</span>
+          </div>
+
+          <div className="barra-valoracion">
+            <span style={{ width: `${valoracion.porcentaje}%` }} />
+          </div>
+
+          <p className="campo-ayuda mt-3 mb-0">
+            Promedio de los {valoracion.evaluadas} niveles asignados por la
+            profesional evaluadora. No lo calcula la inteligencia artificial.
+          </p>
+        </div>
+      )}
             {puedeEvaluar && (
         <div className="bloque mb-3">
           <h2 className="bloque-titulo">Evaluación psicolaboral</h2>

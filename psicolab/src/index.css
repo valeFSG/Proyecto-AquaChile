@@ -242,6 +242,29 @@ body {
 .dato-label { font-size: .72rem; color: var(--texto-sec); margin-bottom: .2rem; }
 .dato-valor { font-size: .88rem; }
 
+.valoracion-cifra {
+  font-size: 2.4rem;
+  font-weight: 700;
+  line-height: 1;
+  letter-spacing: -.02em;
+  color: var(--cian);
+}
+
+.barra-valoracion {
+  height: 8px;
+  border-radius: 99px;
+  background: var(--linea);
+  overflow: hidden;
+}
+
+.barra-valoracion span {
+  display: block;
+  height: 100%;
+  border-radius: 99px;
+  background: var(--cian);
+  transition: width .4s ease-in-out;
+}
+
 .ruta {
   font-family: ui-monospace, monospace;
   font-size: .8rem;
