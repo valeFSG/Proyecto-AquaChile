@@ -176,8 +176,9 @@ describe('DetalleSolicitud · edición de datos', () => {
     const onGuardarDatos = vi.fn().mockResolvedValue()
     await abrirEdicion({ onGuardarDatos })
 
-    await userEvent.clear(screen.getByLabelText('Cargo al que postula'))
-    await userEvent.type(screen.getByLabelText('Cargo al que postula'), 'Operario de Proceso')
+    await userEvent.selectOptions(
+      screen.getByLabelText('Cargo al que postula'), 'Operario de Proceso',
+    )
     await userEvent.click(screen.getByRole('button', { name: 'Guardar cambios' }))
 
     const [datosCandidato, datosSolicitud] = onGuardarDatos.mock.calls[0]

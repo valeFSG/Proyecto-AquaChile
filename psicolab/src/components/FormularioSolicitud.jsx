@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { FAMILIAS } from '../data/catalogo'
+import { FAMILIAS, cargosDe } from '../data/catalogo'
 import { TIPOS } from '../data/solicitudes'
 
 // En la demostración el correo se arma solo a partir del nombre. El sistema
@@ -41,7 +41,7 @@ function FormularioSolicitud({ onCrear, onCancelar }) {
 
   const esInterno = valores.tipo === TIPOS.INTERNO
 
-    // Mientras no se escriba el correo a mano, sigue al nombre.
+      // Mientras no se escriba el correo a mano, sigue al nombre.
   function cambiar(evento) {
     const { name, value } = evento.target
 
@@ -50,6 +50,8 @@ function FormularioSolicitud({ onCrear, onCancelar }) {
     setValores((previos) => ({
       ...previos,
       [name]: value,
+      // Los cargos dependen de la familia: al cambiarla, el anterior ya no aplica.
+      ...(name === 'familiaCargo' ? { cargo: '' } : {}),
       ...(name === 'nombre' && !correoManual
         ? { correo: correoDesdeNombre(value) }
         : {}),
@@ -67,7 +69,7 @@ function FormularioSolicitud({ onCrear, onCancelar }) {
     }
 
     if (!valores.familiaCargo) nuevos.familiaCargo = 'Elige una familia de cargo.'
-    if (!valores.cargo.trim()) nuevos.cargo = 'Escribe el cargo al que postula.'
+    if (!valores.cargo) nuevos.cargo = 'Elige el cargo al que postula.'
     if (!valores.analista.trim()) nuevos.analista = 'Indica quién solicita.'
 
     if (esInterno) {
@@ -202,11 +204,18 @@ function FormularioSolicitud({ onCrear, onCancelar }) {
 
         <div className="col-12 col-md-4">
           <label className="campo-label" htmlFor="cargo">Cargo al que postula</label>
-          <input
+            <select
             id="cargo" name="cargo" className="campo-input"
             value={valores.cargo} onChange={cambiar}
-            placeholder="Ej: Jefe de Turno Planta"
-          />
+            disabled={!valores.familiaCargo}
+          >
+            <option value="">
+              {valores.familiaCargo ? 'Selecciona un cargo' : 'Elige primero la familia'}
+            </option>
+            {cargosDe(valores.familiaCargo).map((cargo) => (
+              <option key={cargo} value={cargo}>{cargo}</option>
+            ))}
+          </select>
           {errores.cargo && <span className="campo-error">{errores.cargo}</span>}
         </div>
 

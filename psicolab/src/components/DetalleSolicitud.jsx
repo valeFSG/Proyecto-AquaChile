@@ -3,7 +3,7 @@ import FormularioEntrevista from './FormularioEntrevista'
 import InformeIA from './InformeIA'
 import { planificarCarpeta } from '../lib/carpeta'
 import { ETAPAS, TIPOS, CATEGORIAS } from '../data/solicitudes'
-import { FAMILIAS } from '../data/catalogo'
+import { FAMILIAS, cargosDe } from '../data/catalogo'
 import { COMPETENCIAS, NIVELES, NIVELES_NEGATIVOS } from '../data/competencias'
 
 const SIGUIENTE_ETAPA = {
@@ -281,10 +281,17 @@ function DetalleSolicitud({
 
             <div className="col-12 col-md-4">
               <label className="campo-label" htmlFor="cargo">Cargo al que postula</label>
-              <input
+              <select
                 id="cargo" name="cargo" className="campo-input"
                 value={datos.cargo} onChange={cambiarDato}
-              />
+              >
+                {!cargosDe(datos.familiaCargo).includes(datos.cargo) && (
+                  <option value={datos.cargo}>{datos.cargo}</option>
+                )}
+                {cargosDe(datos.familiaCargo).map((cargo) => (
+                  <option key={cargo} value={cargo}>{cargo}</option>
+                ))}
+              </select>
             </div>
 
             <div className="col-12 col-md-4">
